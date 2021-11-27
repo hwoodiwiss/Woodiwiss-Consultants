@@ -1,6 +1,6 @@
-@use 'src/styles/colours';
-@use 'src/styles/effects';
-@use 'src/styles/screen';
+@use "src/styles/colours";
+@use "src/styles/effects";
+@use "src/styles/screen";
 
 @import "src/styles/fonts";
 @import "src/styles/form-styles";
@@ -13,7 +13,7 @@ body {
 	margin: 0;
 	color: colours.$offWhite;
 	font-family: "Fira Sans", Helvetica, Arial, sans-serif;
-	background-image: url("/assets/images/dark_city.jpg");
+	background-image: url("/assets/images/background.png");
 	@supports (background-size: cover) {
 		background-size: cover;
 	}
