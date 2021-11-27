@@ -1,0 +1,168 @@
+@use 'src/styles/colours';
+@use 'src/styles/effects';
+@use 'src/styles/screen';
+
+@import "src/styles/fonts";
+@import "src/styles/form-styles";
+
+.grecaptcha-badge {
+	visibility: hidden;
+}
+
+body {
+	margin: 0;
+	color: colours.$offWhite;
+	font-family: "Fira Sans", Helvetica, Arial, sans-serif;
+	background-image: url("/assets/images/dark_city.jpg");
+	@supports (background-size: cover) {
+		background-size: cover;
+	}
+	background-size: auto;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-color: colours.$darkGrey;
+	height: 100vh;
+	&.show-recaptcha {
+		.grecaptcha-badge {
+			visibility: visible;
+		}
+	}
+}
+
+.container {
+	h1,
+	h2,
+	h3,
+	h4 {
+		margin: 12px 0 12px 0;
+	}
+	padding: 12px;
+	border-radius: 2px;
+	&:not(.no-margin) {
+		margin: 12px;
+	}
+	@include effects.acrylic(colours.$darkGrey, 0.4);
+	justify-content: center;
+	&:not(.no-fill) {
+		height: CALC(100% - 48px);
+	}
+}
+
+div {
+	&.grid-base {
+		margin-left: -6px;
+		display: grid;
+		@include screen.phone {
+			grid-template-columns: auto;
+			grid-template-rows: auto;
+		}
+
+		@include screen.tablet {
+			grid-template-columns: auto auto;
+			grid-template-rows: auto auto;
+		}
+
+		@include screen.desktop {
+			grid-template-columns: auto auto auto;
+			grid-template-rows: auto auto auto;
+		}
+
+		@include screen.highDpi {
+			grid-template-columns: 25% 25% 25% 25%;
+			grid-template-rows: auto auto auto auto;
+		}
+
+		.row {
+			@include screen.phone {
+				grid-column: span 1;
+			}
+			@include screen.tablet {
+				grid-column: span 2;
+			}
+			@include screen.desktop {
+				grid-column: span 3;
+			}
+			@include screen.highDpi {
+				grid-column: span 4;
+			}
+		}
+
+		.rect-1-2 {
+			grid-column: span 1;
+			grid-row: span 2;
+		}
+
+		.square-4 {
+			@include screen.phone {
+				grid-column: span 1;
+			}
+
+			grid-column: span 2;
+			grid-row: span 2;
+		}
+	}
+}
+
+button {
+	font-family: "Fira Sans Bold", "Fira Sans", Helvetica, Arial, sans-serif;
+	border-radius: 2px;
+	margin: 6px;
+	height: 3em;
+	color: colours.$offWhite;
+	border-style: solid;
+	transition: background-color 0.2s;
+	transition: border-color 0.2s;
+	cursor: pointer;
+
+	&.slim {
+		height: 2em;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		outline: solid;
+		outline-color: colours.$offWhite;
+	}
+
+	&:active {
+		transition: background-color 0.2s;
+	}
+
+	&.warn {
+		border-color: colours.$brightRed;
+		background-color: colours.$brightRed;
+
+		&:active {
+			border-color: colours.$darkRed;
+			background-color: colours.$darkRed;
+		}
+	}
+
+	&.success {
+		border-color: colours.$lightGreen;
+		background-color: colours.$lightGreen;
+
+		&:active {
+			border-color: colours.$darkGreen;
+			background-color: colours.$darkGreen;
+		}
+	}
+}
+
+a {
+	color: colours.$offWhite;
+}
+
+//Needs to be in global styles to avoid component encapsulation
+editor.editable {
+	div.mce-content-body {
+		border: solid;
+		border-radius: 2px;
+		border-width: 1px;
+		border-color: colours.$offWhite;
+	}
+}

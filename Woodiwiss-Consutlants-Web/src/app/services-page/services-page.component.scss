@@ -1,0 +1,30 @@
+@use '/src/styles/screen';
+
+div.grid-base {
+	div.split-row {
+		display: flex;
+		align-items: center;
+
+		@include screen.phone {
+			flex-direction: column;
+		}
+
+		flex-direction: row;
+		.col {
+			display: flex;
+			width: 100%;
+			justify-content: center;
+			img {
+				max-width: 100%;
+				max-height: 300px;
+			}
+		}
+	}
+
+	div.split-row:nth-child(even) {
+		@include screen.phone {
+			flex-direction: column;
+		}
+		flex-direction: row-reverse;
+	}
+}

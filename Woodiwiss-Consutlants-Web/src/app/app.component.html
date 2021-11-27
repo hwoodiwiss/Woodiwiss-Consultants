@@ -1,0 +1,84 @@
+<a id="skip-header" href="#main" aria-details="Skip to content"
+	>Skip to content</a
+>
+<div class="outerNavWrapper">
+	<div class="navWrapper" [ngClass]="getActive()">
+		<nav>
+			<div class="nav-container">
+				<div class="logoWrapper">
+					<img
+						alt="Woodiwiss Consultants Logo"
+						src="/assets/images/Logo.png"
+					/>
+				</div>
+				<div class="buttonWrapper">
+					<img
+						alt="Woodiwiss Consultants Logo"
+						class="button-logo"
+						src="/assets/images/Logo.png"
+					/>
+					<span class="nav-item">
+						<a [routerLink]="['/']" (click)="active = false"
+							>Home</a
+						>
+					</span>
+					<span class="nav-item">
+						<a [routerLink]="['/About']" (click)="active = false"
+							>About</a
+						>
+					</span>
+					<span class="nav-item">
+						<a [routerLink]="['/Services']" (click)="active = false"
+							>Services</a
+						>
+					</span>
+					<span class="nav-item">
+						<a [routerLink]="['/Gallery']" (click)="active = false"
+							>Gallery</a
+						>
+					</span>
+					<span class="nav-item">
+						<a [routerLink]="['/Contact']" (click)="active = false"
+							>Contact</a
+						>
+					</span>
+					<span *ngIf="showAdmin" class="nav-item">
+						<a [routerLink]="['/Admin']" (click)="active = false"
+							>Admin</a
+						>
+					</span>
+					<span *ngIf="!showAdmin" class="nav-item">
+						<a [routerLink]="['/Login']" (click)="active = false"
+							>Login</a
+						>
+					</span>
+				</div>
+				<div class="closeWrapper" (click)="toggleActive()">
+					<span aria-label="Close Menu">X</span>
+				</div>
+			</div>
+
+			<div class="responsive-sidebar" (click)="toggleActive()">
+				<img
+					alt="Open Menu"
+					src="/assets/icons/menu.png"
+					aria-label="Open Menu"
+				/>
+			</div>
+		</nav>
+		<main id="main">
+			<router-outlet></router-outlet>
+		</main>
+		<footer>
+			<a href="https://www.facebook.com"
+				><img alt="Facebook Logo" src="/assets/icons/facebook.png"
+			/></a>
+			<a href="https://www.twitter.com"
+				><img alt="Twitter Logo" src="/assets/icons/twitter.png"
+			/></a>
+			<a href="https://www.pinterest.co.uk/"
+				><img alt="Pinterest Logo" src="/assets/icons/pinterest.png"
+			/></a>
+		</footer>
+	</div>
+</div>

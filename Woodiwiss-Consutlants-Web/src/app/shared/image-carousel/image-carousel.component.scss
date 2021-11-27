@@ -1,0 +1,93 @@
+@use "/src/styles/colours";
+@use "/src/styles/effects";
+@use "/src/styles/screen";
+@use "sass:color";
+
+:host {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	.button-container {
+		flex-shrink: 1;
+		position: relative;
+		height: 50%;
+		z-index: 5;
+		button {
+			@include screen.phone-tablet {
+				top: -50px;
+			}
+			&:focus-visible {
+				outline: solid;
+				outline-color: colours.$offWhite;
+			}
+			height: 6em;
+			width: 3em;
+			border-color: color.change(colours.$darkGrey, $alpha: 0.2);
+			@include effects.acrylic(colours.$darkGrey, 0.2);
+			position: absolute;
+			&.prev {
+				left: 0;
+			}
+
+			&.next {
+				right: 0;
+			}
+		}
+	}
+}
+
+div.carousel-container {
+	position: relative;
+	flex-grow: 1;
+	align-self: center;
+	overflow: hidden;
+	text-align: center;
+	height: max-content;
+
+	@include screen.tablet {
+		min-height: 400px;
+	}
+	@include screen.desktop {
+		min-height: 600px;
+		max-width: 900px;
+	}
+	@include screen.highDpi {
+		min-height: 800px;
+		max-width: 1200px;
+	}
+	img {
+		transition: ease 1s transform, ease 1s position, linear 1s opacity;
+		display: none;
+		@include screen.phone {
+			width: 90%;
+		}
+		@include screen.tablet {
+			width: 95%;
+		}
+		@include screen.desktop {
+			height: 600px;
+		}
+		@include screen.highDpi {
+			height: 800px;
+		}
+		&.current-image {
+			display: inline;
+			opacity: 1;
+		}
+
+		&.prev-image {
+			display: inline;
+			position: absolute;
+			transform: translateX(-100%);
+			opacity: 0;
+		}
+
+		&.next-image {
+			display: inline;
+			position: absolute;
+			transform: translateX(100%);
+			opacity: 0;
+		}
+	}
+}

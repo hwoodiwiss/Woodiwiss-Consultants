@@ -1,0 +1,123 @@
+{
+	"$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+	"cli": {
+		"analytics": false
+	},
+	"version": 1,
+	"newProjectRoot": "projects",
+	"projects": {
+		"woodiwiss-consultants-web": {
+			"projectType": "application",
+			"schematics": {
+				"@schematics/angular:component": {
+					"inlineTemplate": false,
+					"inlineStyle": false,
+					"style": "scss",
+					"skipTests": false
+				},
+				"@schematics/angular:class": {
+					"skipTests": true
+				},
+				"@schematics/angular:directive": {
+					"skipTests": true
+				},
+				"@schematics/angular:guard": {
+					"skipTests": true
+				},
+				"@schematics/angular:interceptor": {
+					"skipTests": true
+				},
+				"@schematics/angular:module": {
+				},
+				"@schematics/angular:pipe": {
+					"skipTests": true
+				},
+				"@schematics/angular:service": {
+					"skipTests": true
+				}
+			},
+			"root": "",
+			"sourceRoot": "src",
+			"prefix": "wcw",
+			"architect": {
+				"build": {
+					"builder": "@angular-devkit/build-angular:browser",
+					"options": {
+						"outputPath": "dist/woodiwiss-consultants-web",
+						"index": "src/index.html",
+						"main": "src/main.ts",
+						"polyfills": "src/polyfills.ts",
+						"tsConfig": "tsconfig.app.json",
+						"assets": [
+							"src/favicon.ico",
+							"src/assets",
+							"src/.htaccess"
+						],
+						"styles": ["src/styles.scss"],
+						"scripts": [],
+						"vendorChunk": true,
+						"extractLicenses": false,
+						"buildOptimizer": false,
+						"sourceMap": true,
+						"optimization": false,
+						"namedChunks": true
+					},
+					"configurations": {
+						"production": {
+							"fileReplacements": [
+								{
+									"replace": "src/environments/environment.ts",
+									"with": "src/environments/environment.prod.ts"
+								}
+							],
+							"optimization": true,
+							"outputHashing": "all",
+							"sourceMap": false,
+							"namedChunks": false,
+							"extractLicenses": true,
+							"vendorChunk": false,
+							"buildOptimizer": true,
+							"budgets": [
+								{
+									"type": "initial",
+									"maximumWarning": "2mb",
+									"maximumError": "5mb"
+								},
+								{
+									"type": "anyComponentStyle",
+									"maximumWarning": "7kb",
+									"maximumError": "10kb"
+								}
+							]
+						}
+					}
+				},
+				"serve": {
+					"builder": "@angular-devkit/build-angular:dev-server",
+					"options": {
+						"browserTarget": "woodiwiss-consultants-web:build"
+					},
+					"configurations": {
+						"production": {
+							"browserTarget": "woodiwiss-consultants-web:build:production"
+						}
+					}
+				},
+				"extract-i18n": {
+					"builder": "@angular-devkit/build-angular:extract-i18n",
+					"options": {
+						"browserTarget": "woodiwiss-consultants-web:build"
+					}
+				},
+				"test": {
+					"builder": "@angular-builders/jest:run",
+					"options": {
+						"tsConfig": "tsconfig.spec.json",
+						"configPath": "jest.config.js"
+					}
+				}
+			}
+		}
+	},
+	"defaultProject": "woodiwiss-consultants-web"
+}

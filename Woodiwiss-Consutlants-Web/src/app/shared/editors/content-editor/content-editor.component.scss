@@ -1,0 +1,8 @@
+div {
+	&:not(.container) {
+		width: 100%;
+	}
+	.container {
+		min-height: 100px;
+	}
+}

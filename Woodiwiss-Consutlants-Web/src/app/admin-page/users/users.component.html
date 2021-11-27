@@ -1,0 +1,49 @@
+<div class="grid-base">
+	<div class="container row">
+		<h2>Users</h2>
+		<div class="user-container">
+			<div class="users-header">
+				<div class="user-field"><h5>Email</h5></div>
+				<div class="user-field"><h5>First Name</h5></div>
+				<div class="user-field"><h5>Last Name</h5></div>
+				<div class="user-field actions"><h5>Actions</h5></div>
+			</div>
+			<ng-container *ngFor="let user of users">
+				<div class="user-row">
+					<div class="user-field">{{ user.Email }}</div>
+					<div class="user-field">{{ user.FirstName }}</div>
+					<div class="user-field">{{ user.LastName }}</div>
+					<div class="flex-break"></div>
+					<div>
+						<button
+							name="UpdateUser"
+							class="success"
+							[routerLink]="['../Update-User']"
+							[state]="{ User: user }"
+						>
+							Update
+						</button>
+						<button
+							*ngIf="user.Id != currentUser.Id && user.Id != 1"
+							name="DisableUser"
+							class="warn"
+							(click)="openDelete(user)"
+						>
+							Delete
+						</button>
+					</div>
+				</div>
+				<div class="delete-row" *ngIf="user.DeleteOpen">
+					<wcw-delete-user-form
+						[user]="user"
+						(onComplete)="completeDelete($event)"
+						(onCancel)="cancelDelete($event)"
+					></wcw-delete-user-form>
+				</div>
+			</ng-container>
+		</div>
+		<button [routerLink]="['../Add-User']" class="success">
+			Add Users
+		</button>
+	</div>
+</div>

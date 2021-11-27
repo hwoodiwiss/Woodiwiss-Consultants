@@ -1,0 +1,10 @@
+@use "sass:color";
+
+@mixin acrylic($colour, $opacity) {
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	background-blend-mode: exclusion;
+	background: color.change($colour, $alpha: $opacity);
+	background-repeat: repeat;
+	background-image: url("/assets/images/acrylic-noise.png");
+}

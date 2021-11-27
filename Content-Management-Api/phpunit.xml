@@ -1,0 +1,14 @@
+<phpunit 
+	backupGlobals = "true"
+	processIsolation = "true"
+	colors = "true"
+>
+<testsuites>
+	<testsuite name="Content Management API">
+		<directory>./tests</directory>
+	</testsuite>
+</testsuites>
+<logging>
+	<junit outputFile="junit.xml" />
+</logging>
+</phpunit>

@@ -1,0 +1,41 @@
+@mixin phone {
+	@media (max-width: 599px) {
+		@content;
+	}
+}
+
+@mixin tablet {
+	@media (min-width: 600px) and (max-width: 899px) {
+		@content;
+	}
+}
+
+@mixin phone-tablet {
+	@include phone {
+		@content;
+	}
+	@include tablet {
+		@content;
+	}
+}
+
+@mixin desktop {
+	@media (min-width: 900px) {
+		@content;
+	}
+}
+
+@mixin highDpi {
+	@media (min-width: 1200px) {
+		@content;
+	}
+}
+
+@mixin desktop-all {
+	@include desktop {
+		@content;
+	}
+	@include highDpi {
+		@content;
+	}
+}

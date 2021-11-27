@@ -1,0 +1,38 @@
+@use "/src/styles/colours";
+@use "/src/styles/effects";
+
+div.loading-container {
+	display: flex;
+	justify-content: center;
+}
+
+div.success-container {
+	display: flex;
+	flex-direction: column;
+}
+
+.form-container.loading {
+	form.contact-form {
+		display: none;
+	}
+
+	div.loading-container {
+		display: flex;
+	}
+}
+
+.form-container.success {
+	form.contact-form {
+		display: none;
+	}
+
+	div.success-container {
+		display: flex;
+	}
+}
+
+form.contact-form {
+	font-family: "Fira Sans", Helvetica, Arial, sans-serif;
+	display: flex;
+	flex-direction: column;
+}

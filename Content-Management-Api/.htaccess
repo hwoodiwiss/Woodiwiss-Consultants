@@ -1,0 +1,31 @@
+<Files .htaccess>
+	Order allow,deny
+	Deny from all
+</Files>
+<FilesMatch "\.(ini)$">
+	Order allow,deny
+	Deny from all
+</FilesMatch>
+<FilesMatch "\.(ini)$">
+	Order allow,deny
+	Deny from all
+</FilesMatch>
+<FilesMatch "^\.">
+	Order allow,deny
+	Deny from all
+</FilesMatch>
+
+Header set X-Frame-Options deny
+Header set X-XSS-Protection "1; mode=block"
+
+Options -Indexes
+ErrorDocument 400 /400.php
+ErrorDocument 401 /401.php
+ErrorDocument 403 /404.php
+ErrorDocument 404 /404.php
+
+RewriteEngine on
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]

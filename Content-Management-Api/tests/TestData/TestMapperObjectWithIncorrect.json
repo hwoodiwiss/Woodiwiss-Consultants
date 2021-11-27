@@ -1,0 +1,22 @@
+{
+  "noodles": [
+    {
+      "noodleName": "ShinRamyun",
+      "noodelDiameter": 0.3
+    },
+    {
+      "noodleName": "Udon",
+      "noodelDiameter": 0.8
+    }
+  ],
+  "sausages": [
+    {
+      "sausageName": "Cumberland",
+      "sausageDiameter": 2.5
+    },
+    {
+      "sausageName": "Chipolata",
+      "sausageDiameter": 1.8
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+<div class="button-container">
+	<button name="Previous Image" class="prev" (click)="movePrev()">
+		&lt;
+	</button>
+</div>
+<div
+	id="carousel-container"
+	class="carousel-container"
+	tabindex="0"
+	(keydown.arrowleft)="movePrev()"
+	(keydown.arrowright)="moveNext()"
+>
+	<img
+		*ngFor="let image of images; let i = index"
+		[src]="image[0]"
+		[alt]="image[1]"
+		[attr.class]="getClassForIndex(i)"
+	/>
+</div>
+<div class="button-container">
+	<button name="Next Image" class="next" (click)="moveNext()">&gt;</button>
+</div>

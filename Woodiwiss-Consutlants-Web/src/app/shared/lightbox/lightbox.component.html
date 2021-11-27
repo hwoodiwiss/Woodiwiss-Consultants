@@ -1,0 +1,71 @@
+<div class="row container no-fill no-margin">
+	<div
+		*ngFor="let image of images; let i = index"
+		class="col"
+		tabindex="0"
+		(keydown.enter)="openLightbox(i)"
+	>
+		<img
+			[src]="image[0]"
+			(click)="openLightbox(i)"
+			class="hover-shadow preview"
+			[alt]="image[1]"
+		/>
+	</div>
+</div>
+
+<div *ngIf="isOpen" class="modal" (keydown.escape)="closeLightbox()">
+	<span class="close pointer" (click)="closeLightbox()">&times;</span>
+	<div class="modal-content">
+		<div
+			class="img-container"
+			tabindex="0"
+			(keydown.arrowleft)="changeSlide(-1)"
+			(keydown.arrowright)="changeSlide(1)"
+		>
+			<div
+				*ngFor="let image of images; let i = index"
+				class="slide"
+				[attr.style]="
+					slideIndex == i ? 'display: block;' : 'display: none;'
+				"
+			>
+				<img [src]="image[0]" class="image-slide" [alt]="image[1]" />
+				<h3>{{ image[2] }}</h3>
+			</div>
+
+			<a
+				class="previous"
+				tabindex="0"
+				(click)="changeSlide(-1)"
+				(keydown.enter)="changeSlide(-1)"
+				>&#10094;</a
+			>
+			<a
+				class="next"
+				tabindex="0"
+				(click)="changeSlide(1)"
+				(keydown.enter)="changeSlide(1)"
+				>&#10095;</a
+			>
+		</div>
+
+		<div class="dots">
+			<div
+				*ngFor="let image of images; let i = index"
+				class="col"
+				tabindex="0"
+				(keydown.enter)="moveSlide(i)"
+			>
+				<img
+					[src]="image[0]"
+					class="modal-preview hover-shadow"
+					(click)="moveSlide(i)"
+					[alt]="image[1]"
+					[class.active]="i == slideIndex"
+					[tabindex]="1 + i"
+				/>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,19 @@
+@use "src/styles/colours";
+@use "src/styles/effects";
+@use "src/styles/screen";
+
+.map-container {
+	min-height: 400px;
+
+	iframe.map {
+		@include screen.phone-tablet {
+			height: 320px;
+			width: 100%;
+		}
+		@include screen.desktop-all {
+			min-width: 380px;
+			min-height: 380px;
+			width: 100%;
+		}
+	}
+}

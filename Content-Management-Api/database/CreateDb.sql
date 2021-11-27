@@ -1,0 +1,25 @@
+DROP TABLE IF EXISTS `Users`;
+DROP TABLE IF EXISTS `EditorContent`;
+
+CREATE TABLE `Users`(
+Id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+Email VARCHAR(50) NOT NULL,
+FirstName VARCHAR(50) NOT NULL,
+LastName VARCHAR(50) NOT NULL,
+PassHash VARCHAR(128) NOT NULL,
+Active BOOLEAN NOT NULL DEFAULT 1);
+
+INSERT INTO Users (Email, FirstName, LastName, PassHash) VALUES
+('admin@mydomain.com',
+'Super',
+'User',
+'$2y$13$AmsiX4EERsYW4XZ.sYOLPe2Swsu/I0xPT5DvN3vb3hv/JASviF1D.');
+
+CREATE TABLE `EditorContent` (
+	Id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	ContentId CHAR(36) NOT NULL,
+	LastModifiedBy INT NOT NULL,
+	LastModifiedDate timestamp NOT NULL,
+	Content VARCHAR(10000) NOT NULL,
+	FOREIGN KEY(LastModifiedBy) REFERENCES Users(Id)
+	);

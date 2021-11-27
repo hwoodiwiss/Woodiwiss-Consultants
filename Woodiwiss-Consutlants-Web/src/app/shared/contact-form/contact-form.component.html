@@ -1,0 +1,90 @@
+<div class="form-container">
+	<div *ngIf="error" class="submit-errors">
+		<p>An Unexpected Error Occurred. Please try again later.</p>
+	</div>
+	<form
+		*ngIf="!loading && !success"
+		class="contact-form"
+		[formGroup]="formGroup"
+		(ngSubmit)="onSubmit($event)"
+	>
+		<label>
+			Name:
+			<input
+				name="Name"
+				type="text"
+				formControlName="Name"
+				maxlength="50"
+			/>
+			<div *ngIf="showErrorsForControl('Name')" class="form-errors">
+				<p *ngFor="let error of getControlValidationErrors('Name')">
+					{{ error }}
+				</p>
+			</div>
+		</label>
+		<label>
+			Organisation (Optional):
+			<input
+				name="Organisation"
+				type="text"
+				formControlName="Organisation"
+				maxlength="50"
+			/>
+			<div
+				*ngIf="showErrorsForControl('Organisation')"
+				class="form-errors"
+			>
+				<p
+					*ngFor="
+						let error of getControlValidationErrors('Organisation')
+					"
+				>
+					{{ error }}
+				</p>
+			</div>
+		</label>
+		<label>
+			Email:
+			<input
+				name="Email"
+				type="email"
+				formControlName="Email"
+				maxlength="50"
+			/>
+			<div *ngIf="showErrorsForControl('Email')" class="form-errors">
+				<p *ngFor="let error of getControlValidationErrors('Email')">
+					{{ error }}
+				</p>
+			</div>
+		</label>
+		<label>
+			Message:
+			<textarea
+				name="Message"
+				type="text"
+				formControlName="Message"
+				maxlength="255"
+			></textarea>
+			<div *ngIf="showErrorsForControl('Message')" class="form-errors">
+				<p *ngFor="let error of getControlValidationErrors('Message')">
+					{{ error }}
+				</p>
+			</div>
+		</label>
+		<button name="Send" class="success" type="submit">Send</button>
+	</form>
+	<div *ngIf="loading" class="loading-container">
+		<h2>Loading...</h2>
+	</div>
+	<div *ngIf="success" class="success-container">
+		<h4>Form Submitted Successfully!</h4>
+		<button
+			name="Reset Form"
+			class="warn"
+			type="button"
+			(click)="resetForm()"
+		>
+			Start Again
+		</button>
+	</div>
+</div>

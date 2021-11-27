@@ -1,0 +1,126 @@
+<div class="form-container">
+	<div *ngIf="error" class="submit-errors">
+		<p>An Unexpected Error Occurred. Please try again later.</p>
+	</div>
+	<div *ngIf="showErrorsForGroup()" class="form-errors">
+		<p *ngFor="let error of getGroupValidationErrors()">
+			{{ error }}
+		</p>
+	</div>
+	<form
+		*ngIf="!loading && !success"
+		class="contact-form"
+		[formGroup]="formGroup"
+		(ngSubmit)="onSubmit($event)"
+	>
+		<label>
+			Email:
+			<input
+				name="Email"
+				type="email"
+				formControlName="Email"
+				maxlength="50"
+				autocomplete="email"
+				[attr.disabled]="disableUserFields()"
+			/>
+			<div *ngIf="showErrorsForControl('Email')" class="form-errors">
+				<p *ngFor="let error of getControlValidationErrors('Email')">
+					{{ error }}
+				</p>
+			</div>
+		</label>
+		<label>
+			First Name:
+			<input
+				name="Firstname"
+				type="text"
+				formControlName="Firstname"
+				maxlength="50"
+				autocomplete="given-name"
+				[attr.disabled]="disableUserFields()"
+			/>
+			<div *ngIf="showErrorsForControl('Firstname')" class="form-errors">
+				<p
+					*ngFor="
+						let error of getControlValidationErrors('Firstname')
+					"
+				>
+					{{ error }}
+				</p>
+			</div>
+		</label>
+		<label>
+			Last Name:
+			<input
+				name="Lastname"
+				type="text"
+				formControlName="Lastname"
+				maxlength="50"
+				autocomplete="family-name"
+				[attr.disabled]="disableUserFields()"
+			/>
+			<div *ngIf="showErrorsForControl('Lastname')" class="form-errors">
+				<p *ngFor="let error of getControlValidationErrors('Lastname')">
+					{{ error }}
+				</p>
+			</div>
+		</label>
+		<label>
+			Password:
+			<input
+				name="Password"
+				type="password"
+				formControlName="Password"
+				maxlength="50"
+				autocomplete="new-password"
+			/>
+			<div *ngIf="showErrorsForControl('Password')" class="form-errors">
+				<p *ngFor="let error of getControlValidationErrors('Password')">
+					{{ error }}
+				</p>
+			</div>
+		</label>
+		<label>
+			Confirm Password:
+			<input
+				name="ConfirmPassword"
+				type="password"
+				formControlName="ConfirmPassword"
+				maxlength="50"
+				autocomplete="new-password"
+			/>
+			<div
+				*ngIf="showErrorsForControl('ConfirmPassword')"
+				class="form-errors"
+			>
+				<p
+					*ngFor="
+						let error of getControlValidationErrors(
+							'ConfirmPassword'
+						)
+					"
+				>
+					{{ error }}
+				</p>
+			</div>
+		</label>
+		<button name="Update" class="success" type="submit">Update</button>
+		<button name="Cancel" class="warn" type="button" (click)="cancelForm()">
+			Cancel
+		</button>
+	</form>
+	<div *ngIf="loading" class="loading-container">
+		<h3>Updating...</h3>
+	</div>
+	<div *ngIf="success" class="success-container">
+		<h4>USer Updated Successfully!</h4>
+		<button
+			name="Reset Form"
+			class="warn"
+			type="button"
+			(click)="resetForm()"
+		>
+			Start Again
+		</button>
+	</div>
+</div>

@@ -1,0 +1,218 @@
+@use "src/styles/colours";
+@use "src/styles/screen";
+@use "src/styles/effects";
+
+@include screen.phone {
+	main {
+		width: 100vw;
+		margin: auto;
+	}
+}
+
+@include screen.tablet {
+	main {
+		width: 600px;
+		margin: auto;
+	}
+}
+
+@include screen.desktop {
+	main {
+		width: 900px;
+		margin: auto;
+	}
+}
+
+@include screen.highDpi {
+	main {
+		width: 1200px;
+		margin: auto;
+	}
+}
+
+nav {
+	width: 100%;
+	display: flex;
+	font-family: "Fira Sans Bold", "Fira Sans", Helvetica, Arial Bold,
+		sans-serif;
+	justify-content: flex-end;
+
+	.nav-container {
+		display: flex;
+		font-size: 24pt;
+		margin: 0;
+		padding: 0;
+		transition: ease 1s all;
+		width: 100%;
+		@include screen.phone-tablet {
+			height: 100%;
+			opacity: 1;
+			visibility: none;
+			position: absolute;
+			right: 0;
+			left: 0;
+			top: 0;
+			transform: translateX(100%);
+			@include effects.acrylic(colours.$offGrey, 0.4);
+		}
+		div.logoWrapper {
+			@include screen.phone-tablet {
+				display: none;
+			}
+			flex-grow: 1;
+			img {
+				justify-self: flex-start;
+				height: 30pt;
+				padding: 0.5em 1em;
+			}
+		}
+
+		&:hover {
+			span.nav-item {
+				opacity: 0.4;
+				transition: opacity 0.6s;
+				&:hover {
+					opacity: 1;
+					transition: opacity 0.6s;
+				}
+			}
+		}
+		&:not(:hover) {
+			span.nav-item {
+				opacity: 1;
+				transition: opacity 0.6s;
+			}
+		}
+		div.buttonWrapper {
+			.button-logo {
+				display: none;
+				@include screen.phone-tablet {
+					display: unset;
+				}
+				justify-self: flex-start;
+				height: 30pt;
+				width: 100px;
+				padding: 0.5em 1em;
+			}
+
+			justify-self: flex-end;
+			@include screen.phone-tablet {
+				display: flex;
+				flex-direction: column;
+				flex-grow: 1;
+			}
+			span.nav-item {
+				display: inline-block;
+				a {
+					display: inline-block;
+					color: colours.$offWhite;
+					text-decoration: none;
+					padding: 0.5em 1em;
+				}
+			}
+		}
+
+		div.closeWrapper {
+			@include screen.phone-tablet {
+				display: flex;
+			}
+
+			@include screen.desktop-all {
+				display: none;
+			}
+			display: inline;
+			span {
+				color: colours.$offWhite;
+				font-size: 24px;
+				padding: 0.5em 1em;
+				cursor: pointer;
+			}
+		}
+	}
+
+	.responsive-sidebar {
+		flex-direction: column-reverse;
+		justify-content: center;
+		align-items: center;
+		padding: 0.5em 1em;
+		display: none;
+		cursor: pointer;
+		@include screen.phone-tablet {
+			display: flex;
+		}
+		img {
+			display: block;
+			margin: 2px;
+			height: 24pt;
+			width: 24pt;
+			background-size: contain;
+			filter: invert(1);
+		}
+	}
+}
+
+.navWrapper {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.outerNavWrapper {
+	height: 100%;
+}
+@include screen.phone-tablet {
+	.navWrapper {
+		transition: transform 0.6s ease;
+		&.active {
+			transform: translateX(-100%);
+		}
+	}
+
+	.outerNavWrapper {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		overflow-x: hidden;
+	}
+}
+
+main {
+	padding: 0 6px 0 6px;
+	flex-grow: 1;
+}
+
+footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	height: 60px;
+	@include screen.phone {
+		height: 30px;
+		line-height: 30px;
+	}
+	@include screen.tablet {
+		height: 45px;
+		line-height: 45px;
+	}
+	line-height: 60px;
+	width: 100%;
+	margin-top: auto;
+	@include effects.acrylic(colours.$darkGrey, 0.4);
+	img {
+		@include screen.phone {
+			height: 20px;
+		}
+		@include screen.tablet {
+			height: 30px;
+		}
+		height: 45px;
+		width: auto;
+		padding: 0.3em;
+	}
+}
+
+a#skip-header {
+	position: absolute;
+	left: -1000px;
+}

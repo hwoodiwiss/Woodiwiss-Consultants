@@ -1,0 +1,42 @@
+<div *ngIf="error" class="submit-errors">
+	<p>An Unexpected Error Occurred. Please try again later.</p>
+</div>
+<form
+	*ngIf="!loading"
+	class="login-form"
+	[formGroup]="formGroup"
+	(ngSubmit)="onSubmit($event)"
+>
+	<label>
+		Email:
+		<input
+			name="Email"
+			type="email"
+			formControlName="Email"
+			maxlength="50"
+		/>
+		<div *ngIf="showErrorsForControl('Email')" class="form-errors">
+			<p *ngFor="let error of getControlValidationErrors('Email')">
+				{{ error }}
+			</p>
+		</div>
+	</label>
+	<label>
+		Password:
+		<input
+			name="Password"
+			type="password"
+			formControlName="Password"
+			maxlength="50"
+		/>
+		<div *ngIf="showErrorsForControl('Password')" class="form-errors">
+			<p *ngFor="let error of getControlValidationErrors('Password')">
+				{{ error }}
+			</p>
+		</div>
+	</label>
+	<button name="Send" class="success" type="submit">Send</button>
+</form>
+<div *ngIf="loading" class="loading-container">
+	<h3>Logging In...</h3>
+</div>

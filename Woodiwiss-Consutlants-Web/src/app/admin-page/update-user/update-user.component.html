@@ -1,0 +1,11 @@
+<div class="grid-base">
+	<div class="container row map-container">
+		<h3>Update User</h3>
+		<wcw-update-user-form
+			*ngIf="user"
+			[user]="user"
+			(onComplete)="onComplete()"
+			(onCancel)="onCancel()"
+		></wcw-update-user-form>
+	</div>
+</div>

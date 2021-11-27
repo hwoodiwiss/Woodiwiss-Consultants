@@ -1,0 +1,90 @@
+@use "src/styles/colours";
+@use "src/styles/screen";
+@use "sass:color";
+
+.user-container {
+	width: 100%;
+	display: grid;
+
+	.delete-row {
+		border-style: solid;
+		border-radius: 2px;
+		border-color: colours.$brightRed;
+		wcw-delete-user-form {
+			place-self: center;
+		}
+	}
+	@include screen.desktop-all {
+		.users-header {
+			text-align: left;
+			display: grid;
+			grid-template-columns: 2fr 1fr 1fr 1fr;
+		}
+		.user-row {
+			text-align: left;
+			display: grid;
+			grid-template-columns: 2fr 1fr 1fr 1fr;
+			gap: 2vh 2vw;
+			.flex-break {
+				display: none;
+			}
+			.user-field {
+				width: auto;
+				grid-column: auto;
+				align-self: center;
+			}
+		}
+
+		.delete-row {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr;
+			justify-content: center;
+			wcw-delete-user-form {
+				grid-column: auto;
+				grid-column-start: 2;
+				padding-left: 12px;
+			}
+		}
+	}
+
+	@include screen.phone-tablet {
+		.users-header {
+			display: flex;
+			justify-content: space-around;
+			.user-field {
+				text-align: center;
+				flex-grow: 1;
+			}
+			.actions {
+				display: none;
+			}
+		}
+
+		.user-row {
+			display: flex;
+			justify-content: space-around;
+			flex-wrap: wrap;
+			flex-direction: row;
+			&:nth-child(even) {
+				background-color: color.change(colours.$offWhite, $alpha: 0.3);
+			}
+			.flex-break {
+				height: 0;
+				flex-basis: 100%;
+			}
+			.user-field {
+				width: auto;
+				grid-column: auto;
+				align-self: center;
+			}
+		}
+
+		.delete-row {
+			display: flex;
+			justify-content: center;
+			text-align: center;
+			wcw-delete-user-form {
+			}
+		}
+	}
+}

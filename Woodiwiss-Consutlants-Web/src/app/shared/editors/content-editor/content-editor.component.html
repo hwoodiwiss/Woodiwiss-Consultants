@@ -1,0 +1,10 @@
+<div [attr.class]="useContainer ? 'container' : ''">
+	<wcw-editor
+		*ngIf="loadComplete"
+		[inline]="true"
+		[editorId]="id"
+		[(content)]="editorContent"
+		[editorStyle]="editorStyle"
+	>
+	</wcw-editor>
+</div>

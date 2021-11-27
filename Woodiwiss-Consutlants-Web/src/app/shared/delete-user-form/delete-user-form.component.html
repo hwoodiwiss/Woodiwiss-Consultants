@@ -1,0 +1,27 @@
+<h4>Delete User?</h4>
+<div *ngIf="error" class="submit-errors">
+	<p>An Unexpected Error Occurred. Please try again later.</p>
+	<button
+		name="Close"
+		class="success"
+		type="button"
+		(click)="cancelForm(user.Id)"
+	>
+		Close
+	</button>
+</div>
+<form
+	*ngIf="!loading && !success"
+	[formGroup]="formGroup"
+	(ngSubmit)="onSubmit($event)"
+>
+	<button name="Confirm" class="warn" type="submit">Confirm</button>
+	<button
+		name="Cancel"
+		class="success"
+		type="button"
+		(click)="cancelForm(user.Id)"
+	>
+		Cancel
+	</button>
+</form>

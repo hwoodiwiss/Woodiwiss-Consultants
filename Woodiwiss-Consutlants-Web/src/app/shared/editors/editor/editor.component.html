@@ -1,0 +1,12 @@
+<div class="editorContainer">
+	<editor
+		[attr.class]="canEdit ? 'editable' : ''"
+		[id]="editorId + '_mceeditor'"
+		[disabled]="!canEdit"
+		[inline]="inline"
+		[init]="editorStyle"
+		[(ngModel)]="content"
+		plugins="quickbars hr lists pagebreak autoresize link"
+		(ngModelChange)="dataChanged()"
+	></editor>
+</div>

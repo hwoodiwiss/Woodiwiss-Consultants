@@ -1,0 +1,57 @@
+@font-face {
+	font-family: "Fira Sans";
+	font-style: normal;
+	font-weight: 400;
+	src: url("../assets/fonts/FiraSans-Regular.eot");
+	src: local(""),
+		url("/assets/fonts/FiraSans-Regular.eot#iefix")
+			format("embedded-opentype"),
+		url("/assets/fonts/FiraSans-Regular.woff2") format("woff2"),
+		url("/assets/fonts/FiraSans-Regular.woff") format("woff"),
+		url("/assets/fonts/FiraSans-Regular.ttf") format("truetype"),
+		url("/assets/fonts/FiraSans-Regular.svg#FiraSans") format("svg");
+}
+
+@font-face {
+	font-family: "Fira Sans Bold";
+	src: url("../assets/fonts/FiraSans-Bold.eot");
+	src: local(""),
+		url("/assets/fonts/FiraSans-Bold.eot#iefix") format("embedded-opentype"),
+		url("/assets/fonts/FiraSans-Bold.woff2") format("woff2"),
+		url("/assets/fonts/FiraSans-Bold.woff") format("woff"),
+		url("/assets/fonts/FiraSans-Bold.ttf") format("truetype"),
+		url("/assets/fonts/FiraSans-Bold.svg#FiraSans") format("svg");
+}
+
+h1 {
+	font-family: "Fira Sans Bold", "Fira Sans", Helvetica, Arial, sans-serif;
+	font-size: 2em;
+
+	&.page-title {
+		font-size: 4em;
+	}
+}
+
+h2 {
+	font-family: "Fira Sans Bold", "Fira Sans", Helvetica, Arial, sans-serif;
+	font-size: 1.5em;
+}
+
+h3 {
+	font-family: "Fira Sans Bold", "Fira Sans", Helvetica, Arial, sans-serif;
+	font-size: 1.17em;
+}
+
+h4 {
+	font-family: "Fira Sans Bold", "Fira Sans", Helvetica, Arial, sans-serif;
+	font-size: 1em;
+}
+
+h5 {
+	font-family: "Fira Sans Bold", "Fira Sans", Helvetica, Arial, sans-serif;
+	font-size: 0.8em;
+}
+
+b {
+	font-family: "Fira Sans Bold", "Fira Sans", Helvetica, Arial, sans-serif;
+}

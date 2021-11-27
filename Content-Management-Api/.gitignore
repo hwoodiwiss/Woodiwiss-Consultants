@@ -1,0 +1,7 @@
+**.vscode
+web.config
+
+vendor/*
+*.cache
+junit.xml
+*.secrets.*
