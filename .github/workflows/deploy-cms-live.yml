@@ -26,7 +26,7 @@ jobs:
           files: ./**/junit.xml
 
   Deploy_Live:
-    if: success()
+    needs: Unit_Test
     runs-on: ubuntu-latest
     container: composer:latest
     defaults:
@@ -42,5 +42,5 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ./live/cms
+          server-dir: ./live/cms/
           dangerous-clean-slate: true
