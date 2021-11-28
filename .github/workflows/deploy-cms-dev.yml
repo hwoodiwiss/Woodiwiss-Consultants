@@ -6,7 +6,8 @@ on:
 
 jobs:
   Unit_Test:
-    runs_on: composer-latest
+    runs_on: ubuntu-latest
+    container: composer:latest
     defaults:
       run:
         working-directory: ./Content-Management-Api/
@@ -24,7 +25,8 @@ jobs:
 
   Deploy_Dev:
     if: success()
-    runs_on: composer-latest
+    runs_on: ubuntu-latest
+    container: composer:latest
     defaults:
       run:
         working-directory: ./Content-Management-Api/
