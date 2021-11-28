@@ -41,6 +41,6 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/woodiwiss-consultants-web/
+          local-dir: ./Woodiwiss-Consultants-Web/dist/woodiwiss-consultants-web/
           server-dir: ./live/ui
           dangerous-clean-slate: true

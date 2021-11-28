@@ -42,5 +42,6 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./Content-Management-Api/
           server-dir: ./live/cms/
           dangerous-clean-slate: true
