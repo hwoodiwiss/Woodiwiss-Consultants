@@ -34,6 +34,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Restore Dependencies
         run: composer install --no-dev
+      - name: Deploy Secrets
+        env:
+          SETTINGS: ${{ secrets.CMS_DEV_SETTINGS }}
+        run: |
+          echo "$SETTINGS" > settings.b64
+          cat settings.b64 | base64 -d > settings.ini
       - name: Deploy Application
         uses: SamKirkland/FTP-Deploy-Action@4.2.0
         with:
