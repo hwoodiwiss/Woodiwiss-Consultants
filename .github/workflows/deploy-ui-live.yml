@@ -5,6 +5,7 @@ on:
     paths: "Woodiwiss-Consultants-Web/**"
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   Unit_Test:

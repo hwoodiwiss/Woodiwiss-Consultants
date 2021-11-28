@@ -5,6 +5,7 @@ on:
     paths: "Content-Management-Api/**"
     branches:
       - main
+   workflow_dispatch:
 
 jobs:
   Unit_Test:
