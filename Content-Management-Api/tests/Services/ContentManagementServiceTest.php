@@ -122,7 +122,7 @@ class ContentManagementServiceTest extends TestCase
 	public function testContentManagementService_UpsertContent_ReturnsFalseIfDbFindsOneAndUpsertThrows()
 	{
 		$this->mockEditorContentContext->expects($this->once())->method('select')->willReturn([$this->testDbObject]);
-		$this->mockEditorContentContext->expects($this->once())->method('UpdateObj')->willThrowException(new \Exception('An error occured!'));
+		$this->mockEditorContentContext->expects($this->once())->method('UpdateObj')->willThrowException(new \Exception('An error occurred!'));
 
 		$this->assertFalse($this->service->UpsertContent($this->testUpdateModel, $this->testUser));
 	}
