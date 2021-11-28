@@ -71,7 +71,7 @@ class ContentManagementServiceTest extends TestCase
 
 	public function testContentManagementService_GetContent_ReturnsNullIfContextReturnsGreaterThan1Items()
 	{
-		$this->mockEditorContentContext->expects($this->once())->method('select')->willReturn(["this", "shoudn't happen"]);
+		$this->mockEditorContentContext->expects($this->once())->method('select')->willReturn(["this", "shouldn't happen"]);
 		$actual = $this->service->GetContent($this->testUUID);
 		$this->assertNull($actual);
 	}
