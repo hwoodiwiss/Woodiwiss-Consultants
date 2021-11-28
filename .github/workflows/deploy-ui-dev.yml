@@ -1,0 +1,44 @@
+name: Test & Deploy UI
+
+on:
+  pull:
+    paths: "Woodiwiss-Consultants-Web/**"
+
+jobs:
+  Unit_Test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Woodiwiss-Consultants-Web/
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore Dependencies
+        run: yarn install
+      - name: Run Unit Tests
+        run: yarn test
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: ./**/junit.xml
+
+  Build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Woodiwiss-Consultants-Web/
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore Dependencies
+        run: yarn install
+      - name: Build
+        run: yarn build
+      - name: Deploy Application
+        uses: SamKirkland/FTP-Deploy-Action@4.2.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/woodiwiss-consultants-web/
+          server-dir: ./dev/ui
+          dangerous-clean-slate: true
