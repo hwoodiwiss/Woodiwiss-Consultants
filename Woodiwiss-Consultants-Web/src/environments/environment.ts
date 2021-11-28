@@ -4,7 +4,7 @@
 
 export const environment = {
 	production: false,
-	apiUri: 'dev.cms.WS311470.remote.ac',
+	apiUri: 'https://dev.cms.WS311470.remote.ac',
 	recaptchaPublic: '6LdAIoUaAAAAAEFMhciNrRJKvyPYDlvTQDUPCyTG',
 };
 
