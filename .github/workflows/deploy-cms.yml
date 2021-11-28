@@ -1,8 +1,12 @@
 name: Test & Deploy CMS
 
 on:
+  pull:
+    paths: "Content-Management-Api/**"
   push:
     paths: "Content-Management-Api/**"
+    branches:
+      - main
 
 jobs:
   Unit_Test:
