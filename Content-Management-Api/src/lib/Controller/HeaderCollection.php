@@ -26,7 +26,7 @@ class HeaderCollection implements \ArrayAccess, \Iterator
 	function offsetExists($offset)
 	{
 		if (gettype($offset) === gettype('')) {
-			return array_key_exists($offset, $this->headers);
+			return array_key_exists(strtolower($offset), $this->headers);
 		}
 		else {
 			throw new \InvalidArgumentException('Header name must be a string');
@@ -76,7 +76,7 @@ class HeaderCollection implements \ArrayAccess, \Iterator
 	 */
 	function offsetUnset($offset)
 	{
-		unset($this->headers[$offset]);
+		unset($this->headers[strtolower($offset)]);
 	}
 
 	/**
