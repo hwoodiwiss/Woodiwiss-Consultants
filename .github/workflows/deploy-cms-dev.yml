@@ -25,7 +25,7 @@ jobs:
 
   Deploy_Dev:
     if: success()
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
     container: composer:latest
     defaults:
       run:
