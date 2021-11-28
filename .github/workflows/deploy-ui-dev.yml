@@ -41,5 +41,5 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./Woodiwiss-Consultants-Web/dist/woodiwiss-consultants-web/
-          server-dir: ./dev/ui
+          server-dir: ./dev/ui/
           dangerous-clean-slate: true
