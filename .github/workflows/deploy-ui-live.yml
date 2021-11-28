@@ -1,11 +1,10 @@
-name: Test & Deploy UI
+name: Test & Deploy Live UI
 
-on:
+on: [push, workflow_dispatch]
   push:
     paths: "Woodiwiss-Consultants-Web/**"
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
   Unit_Test:

@@ -1,11 +1,10 @@
 name: Test & Deploy Live CMS
 
-on:
+on: [push, workflow_dispatch]
   push:
     paths: "Content-Management-Api/**"
     branches:
       - main
-   workflow_dispatch:
 
 jobs:
   Unit_Test:

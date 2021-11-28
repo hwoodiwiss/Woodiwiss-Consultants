@@ -1,4 +1,4 @@
-name: Test & Deploy UI
+name: Test & Deploy Dev UI
 
 on:
   pull_request:
