@@ -25,6 +25,7 @@ jobs:
           files: ./**/junit.xml
 
   Build:
+    needs: Unit_Test
     runs-on: ubuntu-latest
     defaults:
       run:
