@@ -46,7 +46,7 @@ class ControllerContextBuilder
 	public function AddCorsHeaders(string $AllowedOrigins): ControllerContextBuilder
 	{
 		if ($AllowedOrigins !== '*') {
-			if (isset($this->context->requestHeaders['Origin']) && str_contains(strtolower($AllowedOrigins), strtolower($this->context->requestHeaders['Origin']))) {
+			if (isset($this->context->requestHeaders['origin']) && str_contains(strtolower($AllowedOrigins), strtolower($this->context->requestHeaders['origin']))) {
 				$this->context->responseHeaders['Access-Control-Allow-Origin'] = $this->context->requestHeaders['Origin'];
 			}
 		}

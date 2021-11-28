@@ -44,7 +44,7 @@ class HeaderCollection implements \ArrayAccess, \Iterator
 	function offsetGet($offset)
 	{
 		if (gettype($offset) === gettype('')) {
-			return $this->headers[$offset];
+			return $this->headers[strtolower($offset)];
 		}
 		else {
 			throw new \InvalidArgumentException('Header name must be a string');
@@ -61,7 +61,7 @@ class HeaderCollection implements \ArrayAccess, \Iterator
 	function offsetSet($offset, $value)
 	{
 		if (gettype($offset) === gettype('')) {
-			$this->headers[$offset] = $value;
+			$this->headers[strtolower($offset)] = $value;
 		}
 		else {
 			throw new \InvalidArgumentException('Header name must be a string');

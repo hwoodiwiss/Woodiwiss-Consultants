@@ -31,7 +31,7 @@ class ContentManagementApi
 	{
 		$this->route = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		$this->method = $_SERVER['REQUEST_METHOD'];
-		$localSettingsFile = __DIR__ . '/../settings.secrets.ini';
+		$localSettingsFile = __DIR__ . '/../settings.local.secrets.ini';
 		$settingsFile = __DIR__ . '/../settings.ini';
 		if (file_exists($localSettingsFile)) {
 			$this->config = AppConfig::from($localSettingsFile);
