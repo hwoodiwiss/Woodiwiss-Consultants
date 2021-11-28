@@ -48,4 +48,3 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./Content-Management-Api/
           server-dir: ./dev/cms/
-          dangerous-clean-slate: true

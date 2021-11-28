@@ -44,4 +44,3 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./Woodiwiss-Consultants-Web/dist/woodiwiss-consultants-web/
           server-dir: ./live/ui/
-          dangerous-clean-slate: true
