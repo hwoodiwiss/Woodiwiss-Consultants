@@ -1,7 +1,7 @@
 name: Test & Deploy UI
 
 on:
-  pull:
+  pull_request:
     paths: "Woodiwiss-Consultants-Web/**"
 
 jobs:
