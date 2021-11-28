@@ -1,8 +1,6 @@
-name: Test & Deploy CMS
+name: Test & Deploy Live CMS
 
 on:
-  pull:
-    paths: "Content-Management-Api/**"
   push:
     paths: "Content-Management-Api/**"
     branches:
@@ -26,7 +24,7 @@ jobs:
         with:
           files: ./**/junit.xml
 
-  Deploy:
+  Deploy_Live:
     if: success()
     runs_on: composer-latest
     defaults:
@@ -36,3 +34,11 @@ jobs:
       - uses: actions/checkout@v2
       - name: Restore Dependencies
         run: composer install --no-dev
+      - name: Deploy Application
+        uses: SamKirkland/FTP-Deploy-Action@4.2.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ./live/cms
+          dangerous-clean-slate: true

@@ -1,0 +1,42 @@
+name: Test & Deploy Dev CMS
+
+on:
+  pull:
+    paths: "Content-Management-Api/**"
+
+jobs:
+  Unit_Test:
+    runs_on: composer-latest
+    defaults:
+      run:
+        working-directory: ./Content-Management-Api/
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore Dependencies
+        run: composer install
+      - name: Run Unit Tests
+        run: ./vendor/bin/phpunit
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: ./**/junit.xml
+
+  Deploy_Dev:
+    if: success()
+    runs_on: composer-latest
+    defaults:
+      run:
+        working-directory: ./Content-Management-Api/
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore Dependencies
+        run: composer install --no-dev
+      - name: Deploy Application
+        uses: SamKirkland/FTP-Deploy-Action@4.2.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ./dev/cms
+          dangerous-clean-slate: true
