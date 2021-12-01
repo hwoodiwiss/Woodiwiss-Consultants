@@ -5,3 +5,6 @@ mod test;
 
 pub use http_client::DirectHttpClient;
 pub use http_client_t::*;
+
+#[cfg(test)]
+pub use test::{TestHttpClient, TestResponse};

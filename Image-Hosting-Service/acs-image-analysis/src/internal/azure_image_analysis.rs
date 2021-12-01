@@ -67,7 +67,23 @@ impl AzureImageAnalysisClientInternal {
 
 #[cfg(test)]
 mod tests {
+    use crate::infra::{TestHttpClient, TestResponse};
+
+    use super::AzureImageAnalysisClientInternal;
+
     #[tokio::test]
     async fn sets_api_key_header() {
+        const EXPECTED_KEY: &str = "123456Secret";
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, headers| {
+            assert!(headers.contains_key("Ocp-Apim-Subscription-Key"));
+            let actual_key = headers
+                .get("Ocp-Apim-Subscription-Key")
+                .expect("No API key header set");
+            assert_eq!(EXPECTED_KEY, actual_key);
+            Ok(Box::new(TestResponse::new(None, None)))
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new("test", EXPECTED_KEY);
+        let _ = analyser.analyse(&test_client, vec![0; 0]).await;
     }
 }
