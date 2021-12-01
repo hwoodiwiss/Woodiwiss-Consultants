@@ -3,7 +3,7 @@ mod infra;
 use std::error;
 use std::fmt::{self};
 
-use infra::ReqwestHttpClient;
+use infra::DirectHttpClient;
 use infra::{HttpClient, HttpError};
 
 #[macro_use]
@@ -79,7 +79,7 @@ impl AzureImageAnalysis {
         &self,
         image_data: Vec<u8>,
     ) -> Result<ImageAnalysisResult, ImageAnalysisError> {
-        let http_client = ReqwestHttpClient(reqwest::Client::new());
+        let http_client = DirectHttpClient(reqwest::Client::new());
 
         let response = http_client
             .post(

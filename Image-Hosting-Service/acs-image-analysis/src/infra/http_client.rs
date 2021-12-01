@@ -4,7 +4,7 @@ use super::{
 };
 use async_trait::async_trait;
 
-pub struct ReqwestResponse(reqwest::Response);
+pub struct HttpResponse(reqwest::Response);
 
 fn map_reqwest_err(error: reqwest::Error) -> HttpError {
     if error.is_timeout() {
@@ -18,26 +18,26 @@ fn map_reqwest_err(error: reqwest::Error) -> HttpError {
     }
 }
 
-impl Response for ReqwestResponse {}
+impl Response for HttpResponse {}
 
-impl ResponseSync for ReqwestResponse {
+impl ResponseSync for HttpResponse {
     fn status(&self) -> StatusCode {
         StatusCode(self.0.status().into())
     }
 }
 
 #[async_trait]
-impl ResponseAsync for ReqwestResponse {
+impl ResponseAsync for HttpResponse {
     async fn text(self: Box<Self>) -> Result<String, HttpError> {
         let text_result = self.0.text().await;
         text_result.map_err(|err| map_reqwest_err(err))
     }
 }
 
-pub struct ReqwestHttpClient(pub reqwest::Client);
+pub struct DirectHttpClient(pub reqwest::Client);
 
 #[async_trait]
-impl HttpClient for ReqwestHttpClient {
+impl HttpClient for DirectHttpClient {
     async fn post(
         &self,
         uri: &str,
@@ -52,7 +52,7 @@ impl HttpClient for ReqwestHttpClient {
         let response = request.send().await;
 
         match response {
-            Ok(resp) => Ok(Box::new(ReqwestResponse(resp))),
+            Ok(resp) => Ok(Box::new(HttpResponse(resp))),
             Err(err) => Err(map_reqwest_err(err)),
         }
     }
