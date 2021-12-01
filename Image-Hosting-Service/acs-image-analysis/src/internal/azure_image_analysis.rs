@@ -86,4 +86,17 @@ mod tests {
         let analyser = AzureImageAnalysisClientInternal::new("test", EXPECTED_KEY);
         let _ = analyser.analyse(&test_client, vec![0; 0]).await;
     }
+
+    #[tokio::test]
+    async fn sets_content_type_header() {
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, headers| {
+            assert!(headers.contains_key("content-type"));
+            let content_type = headers.get("content-type").expect("No API key header set");
+            assert_eq!("application/octet-stream", content_type);
+            Ok(Box::new(TestResponse::new(None, None)))
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new("test", "test");
+        let _ = analyser.analyse(&test_client, vec![0; 0]).await;
+    }
 }
