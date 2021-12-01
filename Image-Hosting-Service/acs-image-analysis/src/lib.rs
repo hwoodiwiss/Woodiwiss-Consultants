@@ -62,14 +62,14 @@ pub struct ImageAnalysisResult {
     pub description: ImageAnalysisDescription,
 }
 
-pub struct AzureImageAnalysis {
+pub struct AzureImageAnalysisClient {
     base_uri: String,
     key: String,
 }
 
-impl AzureImageAnalysis {
+impl AzureImageAnalysisClient {
     pub fn new(base_uri: &str, key: &str) -> Self {
-        AzureImageAnalysis {
+        AzureImageAnalysisClient {
             base_uri: String::from(base_uri),
             key: String::from(key),
         }
