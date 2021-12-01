@@ -1,28 +1,6 @@
 use async_trait::async_trait;
-use std::fmt;
 
-#[derive(Debug)]
-pub enum HttpError {
-    Timeout,
-    TooManyRedirects,
-    NetworkError,
-    DecodingError,
-    Unknown,
-}
-
-impl fmt::Display for HttpError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let desc = match self {
-            HttpError::Timeout => "Connection Timed Out".to_owned(),
-            HttpError::TooManyRedirects => "To Many Redirects".to_owned(),
-            HttpError::NetworkError => "Network Error".to_owned(),
-            HttpError::DecodingError => "Decoding Error".to_owned(),
-            HttpError::Unknown => "Unknown Http Error Ocurred".to_owned(),
-        };
-
-        f.write_str(desc.as_str())
-    }
-}
+use crate::error::HttpError;
 
 pub struct StatusCode(pub u16);
 

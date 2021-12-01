@@ -1,5 +1,7 @@
+use crate::error::HttpError;
+
 use super::{
-    http_client_t::{HttpClient, HttpError, Response, ResponseAsync, ResponseSync},
+    http_client_t::{HttpClient, Response, ResponseAsync, ResponseSync},
     StatusCode,
 };
 use async_trait::async_trait;
