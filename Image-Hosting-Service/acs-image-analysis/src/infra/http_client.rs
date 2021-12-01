@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::error::HttpError;
 
 use super::{
@@ -44,7 +46,7 @@ impl HttpClient for DirectHttpClient {
         &self,
         uri: &str,
         data: Vec<u8>,
-        headers: Vec<(String, String)>,
+        headers: HashMap<String, String>,
     ) -> Result<Box<dyn Response>, HttpError> {
         let http_client = reqwest::Client::new();
         let mut request = http_client.post(uri).body(data);

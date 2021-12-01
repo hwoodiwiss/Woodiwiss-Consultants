@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use async_trait::async_trait;
 
 use crate::error::HttpError;
@@ -27,6 +29,6 @@ pub trait HttpClient {
         &self,
         uri: &str,
         data: Vec<u8>,
-        headers: Vec<(String, String)>,
+        headers: HashMap<String, String>,
     ) -> Result<Box<dyn Response>, HttpError>;
 }

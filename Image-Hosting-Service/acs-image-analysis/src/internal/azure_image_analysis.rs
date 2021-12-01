@@ -28,13 +28,13 @@ impl AzureImageAnalysisClientInternal {
                 )
                 .as_str(),
                 image_data,
-                vec![
+                HashMap::from_iter([
                     (
                         "content-type".to_owned(),
                         "application/octet-stream".to_owned(),
                     ),
                     ("Ocp-Apim-Subscription-Key".to_owned(), self.key.clone()),
-                ],
+                ]),
             )
             .await;
 

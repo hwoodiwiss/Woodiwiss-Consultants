@@ -1,10 +1,12 @@
+use std::collections::HashMap;
+
 use crate::error::HttpError;
 
 use async_trait::async_trait;
 
 use super::{HttpClient, Response, ResponseAsync, ResponseSync, StatusCode};
 
-struct TestResponse<'a> {
+pub struct TestResponse<'a> {
     status_handler: Option<Box<dyn Fn(&Self) -> StatusCode + Send + Sync>>,
     text_handler: Option<Box<dyn Fn(&Self) -> Result<String, HttpError> + Send + Sync>>,
 }
@@ -40,14 +42,14 @@ impl ResponseAsync for TestResponse<'_> {
 
 impl Response for TestResponse<'_> {}
 
-struct TestHttpClient<'a> {
+pub struct TestHttpClient<'a> {
     post_handler: Option<
         Box<
             dyn Fn(
                     &Self,
                     &str,
                     Vec<u8>,
-                    Vec<(String, String)>,
+                    HashMap<String, String>,
                 ) -> Result<Box<dyn Response>, HttpError>
                 + Send
                 + Sync,
@@ -63,7 +65,7 @@ impl<'a> TestHttpClient<'a> {
                         &Self,
                         &str,
                         Vec<u8>,
-                        Vec<(String, String)>,
+                        HashMap<String, String>,
                     ) -> Result<Box<dyn Response>, HttpError>
                     + Send
                     + Sync,
@@ -80,7 +82,7 @@ impl HttpClient for TestHttpClient<'_> {
         &self,
         uri: &str,
         data: Vec<u8>,
-        headers: Vec<(String, String)>,
+        headers: HashMap<String, String>,
     ) -> Result<Box<dyn Response>, HttpError> {
         self.post_handler
             .as_ref()
