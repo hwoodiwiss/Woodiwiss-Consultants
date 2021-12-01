@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::data::ImageAnalysisResult;
 use crate::error::ImageAnalysisError;
 use crate::infra::HttpClient;
@@ -60,5 +62,12 @@ impl AzureImageAnalysisClientInternal {
             Ok(result) => Ok(result),
             Err(_) => Err(ImageAnalysisError::UnexpectedResponseFormat(response_text)),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[tokio::test]
+    async fn sets_api_key_header() {
     }
 }
