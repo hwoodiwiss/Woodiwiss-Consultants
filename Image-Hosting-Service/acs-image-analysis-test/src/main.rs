@@ -1,4 +1,4 @@
-use acs_image_analysis::AzureImageAnalysis;
+use acs_image_analysis::AzureImageAnalysisClient;
 
 #[macro_use]
 extern crate serde;
@@ -12,7 +12,7 @@ struct Config {
 #[tokio::main]
 async fn main() {
     let image_bytes = include_bytes!("../../test-image.jpg");
-    let analyzer = AzureImageAnalysis::new(
+    let analyzer = AzureImageAnalysisClient::new(
         "https://hw-uni-cogsvc.cognitiveservices.azure.com",
         "<ENTER KEY>",
     );
