@@ -3,7 +3,7 @@ mod error;
 mod infra;
 mod internal;
 
-use data::ImageAnalysisResult;
+use data::ImageAnalysis;
 use error::ImageAnalysisError;
 use infra::DirectHttpClient;
 use internal::AzureImageAnalysisClientInternal;
@@ -18,10 +18,7 @@ impl AzureImageAnalysisClient {
         AzureImageAnalysisClient(AzureImageAnalysisClientInternal::new(base_uri, key))
     }
 
-    pub async fn analyse(
-        &self,
-        image_data: Vec<u8>,
-    ) -> Result<ImageAnalysisResult, ImageAnalysisError> {
+    pub async fn analyse(&self, image_data: Vec<u8>) -> Result<ImageAnalysis, ImageAnalysisError> {
         let http_client = DirectHttpClient(reqwest::Client::new());
         self.0.analyse(&http_client, image_data).await
     }

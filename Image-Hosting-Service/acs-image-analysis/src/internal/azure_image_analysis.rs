@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::data::ImageAnalysisResult;
+use crate::data::ImageAnalysis;
 use crate::error::ImageAnalysisError;
 use crate::infra::HttpClient;
 
@@ -21,7 +21,7 @@ impl AzureImageAnalysisClientInternal {
         &self,
         http_client: &dyn HttpClient,
         image_data: Vec<u8>,
-    ) -> Result<ImageAnalysisResult, ImageAnalysisError> {
+    ) -> Result<ImageAnalysis, ImageAnalysisError> {
         let response = http_client
             .post(
                 format!(
@@ -56,7 +56,7 @@ impl AzureImageAnalysisClientInternal {
 
         let response_text = response_text.unwrap();
 
-        let des_result = serde_json::from_str::<ImageAnalysisResult>(response_text.as_str());
+        let des_result = serde_json::from_str::<ImageAnalysis>(response_text.as_str());
 
         match des_result {
             Ok(result) => Ok(result),

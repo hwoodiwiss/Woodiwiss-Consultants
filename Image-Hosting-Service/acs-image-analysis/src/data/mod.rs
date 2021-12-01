@@ -18,7 +18,7 @@ pub struct ImageAnalysisMetadata {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ImageAnalysisResult {
+pub struct ImageAnalysis {
     #[serde(rename(deserialize = "requestId"))]
     pub request_id: String,
     pub metadata: ImageAnalysisMetadata,
