@@ -199,6 +199,26 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn returns_clean_errors_for_unexpected_response_code() {
+        const EXPECTED_STATUS: u16 = 420;
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
+            Ok(Box::new(TestResponse::new(
+                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
+                None,
+            )))
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new("test", "test");
+        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        assert!(result.is_err(), "Result was Ok, expected Error");
+        let err = result.unwrap_err();
+        assert_eq!(
+            ImageAnalysisError::UnexpectedResponseCode(EXPECTED_STATUS),
+            err
+        );
+    }
+
+    #[tokio::test]
     async fn returns_clean_errors_for_bad_request_image_format() {
         const EXPECTED_STATUS: u16 = 400;
         let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
