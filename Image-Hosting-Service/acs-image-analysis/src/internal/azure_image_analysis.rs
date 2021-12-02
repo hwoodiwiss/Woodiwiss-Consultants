@@ -159,7 +159,7 @@ mod tests {
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
         let result = analyser.analyse(&test_client, vec![0; 0]).await;
-        assert!(result.is_err(), "Result was not error");
+        assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::HttpError(HttpError::Unknown), err)
     }
@@ -176,7 +176,7 @@ mod tests {
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
         let result = analyser.analyse(&test_client, vec![0; 0]).await;
-        assert!(result.is_err(), "Result was not error");
+        assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::ServiceError, err);
     }
@@ -193,7 +193,7 @@ mod tests {
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
         let result = analyser.analyse(&test_client, vec![0; 0]).await;
-        assert!(result.is_err(), "Result was not error");
+        assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::ServiceError, err);
     }
@@ -212,7 +212,7 @@ mod tests {
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
         let result = analyser.analyse(&test_client, vec![0; 0]).await;
-        assert!(result.is_err(), "Result was not error");
+        assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::InvalidImageFormat, err);
     }
