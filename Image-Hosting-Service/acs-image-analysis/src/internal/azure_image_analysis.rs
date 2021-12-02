@@ -102,7 +102,10 @@ mod tests {
     async fn sets_api_key_header() {
         const EXPECTED_KEY: &str = "123456Secret";
         let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, headers| {
-            assert!(headers.contains_key("Ocp-Apim-Subscription-Key"));
+            assert!(
+                headers.contains_key("Ocp-Apim-Subscription-Key"),
+                "No key header was found"
+            );
             let actual_key = headers
                 .get("Ocp-Apim-Subscription-Key")
                 .expect("No API key header set");
@@ -117,7 +120,10 @@ mod tests {
     #[tokio::test]
     async fn sets_content_type_header() {
         let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, headers| {
-            assert!(headers.contains_key("content-type"));
+            assert!(
+                headers.contains_key("content-type"),
+                "No content-type header was found"
+            );
             let content_type = headers.get("content-type").expect("No API key header set");
             assert_eq!("application/octet-stream", content_type);
             Ok(Box::new(TestResponse::new(None, None)))
@@ -132,7 +138,11 @@ mod tests {
         const EXPECTED_BASE_URI: &str = "https://a-cog-svc.cognitiveservices.azure.com";
         let test_client = TestHttpClient::new(Some(Box::new(|_client, uri, _data, _headers| {
             let expected_endpoint = &format!("{}/vision/v3.0/analyze?", EXPECTED_BASE_URI);
-            assert!(uri.starts_with(expected_endpoint));
+            assert!(
+                uri.starts_with(expected_endpoint),
+                "Uri did not start with the expected pattern. Uri: {}",
+                uri
+            );
 
             Ok(Box::new(TestResponse::new(None, None)))
         })));
@@ -149,7 +159,7 @@ mod tests {
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
         let result = analyser.analyse(&test_client, vec![0; 0]).await;
-        assert!(result.is_err());
+        assert!(result.is_err(), "Result was not error");
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::HttpError(HttpError::Unknown), err)
     }
