@@ -205,17 +205,7 @@ mod tests {
             Ok(Box::new(TestResponse::new(
                 Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
                 Some(Box::new(|_response| {
-                    Ok(r#"{
-                    "error": {
-                        "code": "some_code",
-                        "message": "some_message",
-                        "innererror": {
-                            "code": "InvalidImageFormat",
-                            "message": "the message"
-                        }
-                    }
-                }"#
-                    .to_owned())
+                    Ok(include_str!("../../test/invalid_image_format.json").to_owned())
                 })),
             )))
         })));
