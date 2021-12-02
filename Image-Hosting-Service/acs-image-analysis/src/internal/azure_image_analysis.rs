@@ -1,12 +1,43 @@
 use std::collections::HashMap;
 
+use serde::Deserialize;
+
 use crate::data::ImageAnalysis;
-use crate::error::ImageAnalysisError;
-use crate::infra::HttpClient;
+use crate::error::{ImageAnalysisError, RequestError};
+use crate::infra::{
+    HttpClient, StatusCode, BAD_REQUEST, INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE,
+};
 
 pub struct AzureImageAnalysisClientInternal {
     base_uri: String,
     key: String,
+}
+
+fn deserialize_response_body<'a, T: Deserialize<'a>>(
+    str: &'a str,
+) -> Result<T, ImageAnalysisError> {
+    serde_json::from_str(str)
+        .map_err(|_err| ImageAnalysisError::UnexpectedResponseFormat(str.to_owned()))
+}
+
+fn map_error_for_non_success(
+    status_code: StatusCode,
+    response_body: &String,
+) -> Result<ImageAnalysisError, ImageAnalysisError> {
+    match status_code {
+        BAD_REQUEST => {
+            let error_info: RequestError = deserialize_response_body(&response_body)?;
+            Ok(error_info.error.inner_error.map_or(
+                ImageAnalysisError::UnexpectedResponseFormat(response_body.clone()),
+                |val| match val.code.as_str() {
+                    "InvalidImageFormat" => ImageAnalysisError::InvalidImageFormat,
+                    _ => ImageAnalysisError::UnexpectedResponseFormat(response_body.clone()),
+                },
+            ))
+        }
+        INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Ok(ImageAnalysisError::ServiceError),
+        _ => Ok(ImageAnalysisError::UnexpectedResponseCode(status_code.0)),
+    }
 }
 
 impl AzureImageAnalysisClientInternal {
@@ -38,36 +69,32 @@ impl AzureImageAnalysisClientInternal {
                     ("Ocp-Apim-Subscription-Key".to_owned(), self.key.clone()),
                 ]),
             )
-            .await;
+            .await
+            .map_err(|err| ImageAnalysisError::HttpError(err))?;
 
-        if let Err(http_error) = response {
-            return Err(ImageAnalysisError::HttpError(http_error));
-        }
-
-        let response = response.unwrap();
-
-        if !response.status().is_success() {}
-
-        let response_text = response.text().await;
-
-        if let Err(http_error) = response_text {
-            return Err(ImageAnalysisError::HttpError(http_error));
-        }
-
-        let response_text = response_text.unwrap();
-
-        let des_result = serde_json::from_str::<ImageAnalysis>(response_text.as_str());
-
-        match des_result {
-            Ok(result) => Ok(result),
-            Err(_) => Err(ImageAnalysisError::UnexpectedResponseFormat(response_text)),
+        if !response.status().is_success() {
+            let status_code = response.status();
+            let response_text = response
+                .text()
+                .await
+                .map_err(|err| ImageAnalysisError::HttpError(err))?;
+            Err(map_error_for_non_success(status_code, &response_text)?)
+        } else {
+            let response_text = response
+                .text()
+                .await
+                .map_err(|err| ImageAnalysisError::HttpError(err))?;
+            Ok(deserialize_response_body(response_text.as_str())?)
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::infra::{TestHttpClient, TestResponse};
+    use crate::{
+        error::{HttpError, ImageAnalysisError},
+        infra::{TestHttpClient, TestResponse},
+    };
 
     use super::AzureImageAnalysisClientInternal;
 
@@ -112,5 +139,18 @@ mod tests {
 
         let analyser = AzureImageAnalysisClientInternal::new(EXPECTED_BASE_URI, "test");
         let _ = analyser.analyse(&test_client, vec![0; 0]).await;
+    }
+
+    #[tokio::test]
+    async fn propagates_http_errors() {
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
+            Err(HttpError::Unknown)
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new("test", "test");
+        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert_eq!(ImageAnalysisError::HttpError(HttpError::Unknown), err)
     }
 }

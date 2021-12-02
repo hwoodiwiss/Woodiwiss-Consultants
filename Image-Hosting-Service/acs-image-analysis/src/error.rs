@@ -1,17 +1,30 @@
 use std::{error, fmt};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct RequestErrorDetails {
+    pub(crate) code: String,
+    pub(crate) message: String,
+    #[serde(rename(deserialize = "innererror"))]
+    pub(crate) inner_error: Option<Box<RequestErrorDetails>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct RequestError {
+    pub(crate) error: RequestErrorDetails,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum ImageAnalysisError {
-    InvalidImageSize,
     InvalidImageFormat,
+    UnexpectedResponseCode(u16),
     UnexpectedResponseFormat(String),
     HttpError(HttpError),
+    ServiceError,
 }
 
 impl fmt::Display for ImageAnalysisError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let desc = match self {
-            ImageAnalysisError::InvalidImageSize => String::from("Invalid Image Size"),
             ImageAnalysisError::InvalidImageFormat => String::from("Invalid Image Format"),
             ImageAnalysisError::UnexpectedResponseFormat(response_body) => {
                 format!("Unexpected response format. Response: {}", response_body)
@@ -19,6 +32,10 @@ impl fmt::Display for ImageAnalysisError {
             ImageAnalysisError::HttpError(http_err) => {
                 format!("Http Error: {}", http_err)
             }
+            ImageAnalysisError::UnexpectedResponseCode(response_code) => {
+                format!("Unexpected response code. Status: {}", response_code)
+            }
+            ImageAnalysisError::ServiceError => String::from("A Service Error Occurred"),
         };
         f.write_str(desc.as_str())
     }
@@ -26,7 +43,7 @@ impl fmt::Display for ImageAnalysisError {
 
 impl error::Error for ImageAnalysisError {}
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum HttpError {
     Timeout,
     TooManyRedirects,
