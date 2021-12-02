@@ -216,4 +216,25 @@ mod tests {
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::InvalidImageFormat, err);
     }
+
+    #[tokio::test]
+    async fn returns_clean_errors_for_bad_request_with_unexpected_body() {
+        const EXPECTED_STATUS: u16 = 400;
+        const UNEXPECTED_RESPONSE: &str = "\u{1f600}";
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
+            Ok(Box::new(TestResponse::new(
+                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
+                Some(Box::new(|_response| Ok(UNEXPECTED_RESPONSE.to_owned()))),
+            )))
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new("test", "test");
+        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        assert!(result.is_err(), "Result was Ok, expected Error");
+        let err = result.unwrap_err();
+        assert_eq!(
+            ImageAnalysisError::UnexpectedResponseFormat(UNEXPECTED_RESPONSE.to_owned()),
+            err
+        );
+    }
 }
