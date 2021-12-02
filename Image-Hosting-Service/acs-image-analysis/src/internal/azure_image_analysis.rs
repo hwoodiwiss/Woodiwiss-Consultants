@@ -92,6 +92,10 @@ impl AzureImageAnalysisClientInternal {
 #[cfg(test)]
 mod tests {
     use crate::{
+        data::{
+            ImageAnalysis, ImageAnalysisDescription, ImageAnalysisDescriptionCaption,
+            ImageAnalysisMetadata,
+        },
         error::{HttpError, ImageAnalysisError},
         infra::{StatusCode, TestHttpClient, TestResponse},
     };
@@ -256,5 +260,62 @@ mod tests {
             ImageAnalysisError::UnexpectedResponseFormat(UNEXPECTED_RESPONSE.to_owned()),
             err
         );
+    }
+
+    #[tokio::test]
+    async fn safely_handles_ok_with_unexpected_body() {
+        const EXPECTED_STATUS: u16 = 200;
+        const UNEXPECTED_RESPONSE: &str = "\u{1f600}";
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
+            Ok(Box::new(TestResponse::new(
+                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
+                Some(Box::new(|_response| Ok(UNEXPECTED_RESPONSE.to_owned()))),
+            )))
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new("test", "test");
+        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        assert!(result.is_err(), "Result was Ok, expected Error");
+        let err = result.unwrap_err();
+        assert_eq!(
+            ImageAnalysisError::UnexpectedResponseFormat(UNEXPECTED_RESPONSE.to_owned()),
+            err
+        );
+    }
+
+    #[tokio::test]
+    async fn returns_image_analysis_if_successful() {
+        const EXPECTED_STATUS: u16 = 200;
+
+        let expected_response = ImageAnalysis {
+            request_id: String::from("8945a17b-2064-463b-8255-848875f0b2a3"),
+            metadata: ImageAnalysisMetadata {
+                width: 3000,
+                height: 1500,
+                format: String::from("Jpeg"),
+            },
+            description: ImageAnalysisDescription {
+                tags: vec![String::from("computer"), String::from("table")],
+                captions: vec![ImageAnalysisDescriptionCaption {
+                    text: String::from("a screenshot of a computer"),
+                    confidence: 0.5741573228533609f64,
+                }],
+            },
+        };
+
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
+            Ok(Box::new(TestResponse::new(
+                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
+                Some(Box::new(|_response| {
+                    Ok(include_str!("../../test/image_description_response.json").to_owned())
+                })),
+            )))
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new("test", "test");
+        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        assert!(result.is_ok(), "Result was Error, expected Ok");
+        let image_analysis = result.unwrap();
+        assert_eq!(expected_response, image_analysis);
     }
 }
