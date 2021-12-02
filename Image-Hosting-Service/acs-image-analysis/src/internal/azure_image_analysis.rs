@@ -17,9 +17,9 @@ impl AzureImageAnalysisClientInternal {
         }
     }
 
-    pub async fn analyse(
+    pub async fn analyse<TClient: HttpClient>(
         &self,
-        http_client: &dyn HttpClient,
+        http_client: &TClient,
         image_data: Vec<u8>,
     ) -> Result<ImageAnalysis, ImageAnalysisError> {
         let response = http_client
