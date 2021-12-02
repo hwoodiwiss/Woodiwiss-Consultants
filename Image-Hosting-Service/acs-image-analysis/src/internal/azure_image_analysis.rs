@@ -93,7 +93,7 @@ impl AzureImageAnalysisClientInternal {
 mod tests {
     use crate::{
         error::{HttpError, ImageAnalysisError},
-        infra::{TestHttpClient, TestResponse},
+        infra::{StatusCode, TestHttpClient, TestResponse},
     };
 
     use super::AzureImageAnalysisClientInternal;
@@ -162,5 +162,68 @@ mod tests {
         assert!(result.is_err(), "Result was not error");
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::HttpError(HttpError::Unknown), err)
+    }
+
+    #[tokio::test]
+    async fn returns_clean_errors_for_internal_server_error() {
+        const EXPECTED_STATUS: u16 = 500;
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
+            Ok(Box::new(TestResponse::new(
+                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
+                None,
+            )))
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new("test", "test");
+        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        assert!(result.is_err(), "Result was not error");
+        let err = result.unwrap_err();
+        assert_eq!(ImageAnalysisError::ServiceError, err);
+    }
+
+    #[tokio::test]
+    async fn returns_clean_errors_for_service_unavailable() {
+        const EXPECTED_STATUS: u16 = 503;
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
+            Ok(Box::new(TestResponse::new(
+                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
+                None,
+            )))
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new("test", "test");
+        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        assert!(result.is_err(), "Result was not error");
+        let err = result.unwrap_err();
+        assert_eq!(ImageAnalysisError::ServiceError, err);
+    }
+
+    #[tokio::test]
+    async fn returns_clean_errors_for_bad_request_image_format() {
+        const EXPECTED_STATUS: u16 = 400;
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
+            Ok(Box::new(TestResponse::new(
+                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
+                Some(Box::new(|_response| {
+                    Ok(r#"{
+                    "error": {
+                        "code": "some_code",
+                        "message": "some_message",
+                        "innererror": {
+                            "code": "InvalidImageFormat",
+                            "message": "the message"
+                        }
+                    }
+                }"#
+                    .to_owned())
+                })),
+            )))
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new("test", "test");
+        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        assert!(result.is_err(), "Result was not error");
+        let err = result.unwrap_err();
+        assert_eq!(ImageAnalysisError::InvalidImageFormat, err);
     }
 }
