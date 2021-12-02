@@ -99,4 +99,18 @@ mod tests {
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
         let _ = analyser.analyse(&test_client, vec![0; 0]).await;
     }
+
+    #[tokio::test]
+    async fn calls_correct_image_analysis_endpoint() {
+        const EXPECTED_BASE_URI: &str = "https://a-cog-svc.cognitiveservices.azure.com";
+        let test_client = TestHttpClient::new(Some(Box::new(|_client, uri, _data, _headers| {
+            let expected_endpoint = &format!("{}/vision/v3.0/analyze?", EXPECTED_BASE_URI);
+            assert!(uri.starts_with(expected_endpoint));
+
+            Ok(Box::new(TestResponse::new(None, None)))
+        })));
+
+        let analyser = AzureImageAnalysisClientInternal::new(EXPECTED_BASE_URI, "test");
+        let _ = analyser.analyse(&test_client, vec![0; 0]).await;
+    }
 }
