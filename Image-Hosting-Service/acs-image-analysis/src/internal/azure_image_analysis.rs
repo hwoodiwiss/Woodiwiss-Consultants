@@ -165,7 +165,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn returns_clean_errors_for_internal_server_error() {
+    async fn safely_handles_internal_server_error() {
         const EXPECTED_STATUS: u16 = 500;
         let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
             Ok(Box::new(TestResponse::new(
@@ -182,7 +182,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn returns_clean_errors_for_service_unavailable() {
+    async fn safely_handles_service_unavailable() {
         const EXPECTED_STATUS: u16 = 503;
         let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
             Ok(Box::new(TestResponse::new(
@@ -199,7 +199,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn returns_clean_errors_for_unexpected_response_code() {
+    async fn safely_handles_unexpected_response_code() {
         const EXPECTED_STATUS: u16 = 420;
         let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
             Ok(Box::new(TestResponse::new(
@@ -219,7 +219,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn returns_clean_errors_for_bad_request_image_format() {
+    async fn safely_handles_bad_request_image_format() {
         const EXPECTED_STATUS: u16 = 400;
         let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
             Ok(Box::new(TestResponse::new(
@@ -238,7 +238,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn returns_clean_errors_for_bad_request_with_unexpected_body() {
+    async fn safely_handles_bad_request_with_unexpected_body() {
         const EXPECTED_STATUS: u16 = 400;
         const UNEXPECTED_RESPONSE: &str = "\u{1f600}";
         let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
