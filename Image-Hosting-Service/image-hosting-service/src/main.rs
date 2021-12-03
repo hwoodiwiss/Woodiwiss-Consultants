@@ -20,12 +20,10 @@ use rocket::{
 fn rocket() -> _ {
     let figment = Figment::from(rocket::Config::default())
         .merge(Serialized::defaults(Config::default()))
-        .merge(Json::file("config.json"));
+        .merge(Json::file("config.json"))
+        .merge(Json::file("config.secrets.json"));
 
-    #[cfg(debug_assertions)] // Only load local secrets file if we're running locally
-    let figment = figment.merge(Json::file("config.secrets.json"));
-
-    rocket::custom(figment)
+    let rocket = rocket::custom(figment)
         .attach(AdHoc::config::<AppConfiguration>())
         .attach(CorsMiddleware)
         .mount("/", routes![home::index])
