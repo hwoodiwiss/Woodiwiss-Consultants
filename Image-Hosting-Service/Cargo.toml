@@ -1,2 +1,2 @@
 [workspace]
-members = ["acs-image-analysis"]
+members = ["acs-image-analysis", "image-hosting-service"]
