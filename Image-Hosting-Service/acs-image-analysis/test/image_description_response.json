@@ -1,0 +1,10 @@
+{
+  "description": {
+    "tags": ["computer", "table"],
+    "captions": [
+      { "text": "a screenshot of a computer", "confidence": 0.5741573228533609 }
+    ]
+  },
+  "requestId": "8945a17b-2064-463b-8255-848875f0b2a3",
+  "metadata": { "height": 1500, "width": 3000, "format": "Jpeg" }
+}

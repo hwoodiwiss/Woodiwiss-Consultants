@@ -1,0 +1,15 @@
+[package]
+name = "acs-image-analysis"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = {version = "0.11.6", features = ["multipart", "json"]}
+serde = {version = "1.0.130", features = ["derive"]}
+serde_json = {version = "1.0.72"}
+async-trait = "0.1.51"
+
+[dev-dependencies]
+tokio = { version = "1.14.0", features = ["rt", "macros"] }

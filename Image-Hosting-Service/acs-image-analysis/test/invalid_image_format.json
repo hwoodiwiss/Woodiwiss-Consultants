@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "some_code",
+    "message": "some_message",
+    "innererror": {
+      "code": "InvalidImageFormat",
+      "message": "the message"
+    }
+  }
+}
