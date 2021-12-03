@@ -1,6 +1,7 @@
 mod data;
 mod endpoints;
 mod middleware;
+mod responders;
 mod service;
 
 #[macro_use]
@@ -25,6 +26,8 @@ fn rocket() -> _ {
 
     let rocket = rocket::custom(figment)
         .attach(AdHoc::config::<AppConfiguration>())
-        .attach(CorsMiddleware)
-        .mount("/", routes![home::index])
+        .attach(CorsMiddleware);
+    let rocket = home::mount(rocket);
+
+    rocket
 }
