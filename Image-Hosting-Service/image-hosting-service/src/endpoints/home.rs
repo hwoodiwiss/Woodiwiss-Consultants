@@ -1,4 +1,9 @@
-use rocket::{http::Header, Response};
+#[options("/")]
+pub fn options() -> OptionsResponse {
+    OptionsResponse {
+        allowed_methods: vec!["OPTIONS", "GET"],
+    }
+}
 
 #[get("/")]
 pub fn index() -> String {
