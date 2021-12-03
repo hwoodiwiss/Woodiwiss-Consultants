@@ -3,8 +3,8 @@ mod error;
 mod infra;
 mod internal;
 
-use data::ImageAnalysis;
-use error::ImageAnalysisError;
+pub use data::ImageAnalysis;
+pub use error::ImageAnalysisError;
 use infra::DirectHttpClient;
 use internal::AzureImageAnalysisClientInternal;
 
