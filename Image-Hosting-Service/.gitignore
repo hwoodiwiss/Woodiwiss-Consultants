@@ -24,3 +24,4 @@ wgpu/red.png
 
 # Readme says to check out CTS here
 cts/
+*.secrets.json

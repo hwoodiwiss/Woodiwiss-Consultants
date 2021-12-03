@@ -1,0 +1,17 @@
+[package]
+name = "image-hosting-service"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = "0.5.0-rc.1"
+serde = {version = "1.0.130", features = ["derive"]}
+figment = { version = "0.10.6", features = ["env", "toml", "json"] }
+image = "0.23.14"
+acs-image-analysis = { path = "../acs-image-analysis" }
+
+
+[dev-dependencies]
+tokio = { version = "1.14.0", features = ["rt", "macros"] }

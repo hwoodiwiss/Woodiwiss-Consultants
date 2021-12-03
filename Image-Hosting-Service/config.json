@@ -1,0 +1,10 @@
+{
+  "port": 8080,
+  "image_sizes": {
+    "thumbnail": { "max_width": 200, "max_height": 200 },
+    "optimal": { "max_width": 1920, "max_height": 1080 }
+  },
+  "cors": {
+    "allow_all": false
+  }
+}
