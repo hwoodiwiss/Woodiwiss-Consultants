@@ -4,7 +4,7 @@ use rocket::{
     Request, Response,
 };
 
-use crate::data::config::AppConfiguration;
+use crate::data::config::{AppConfiguration, CorsConfiguration};
 
 pub struct CorsMiddleware;
 
@@ -22,10 +22,13 @@ impl Fairing for CorsMiddleware {
             .state::<AppConfiguration>()
             .map(|app_config| &app_config.cors);
         if cors_config.is_none() {
-            panic!("Failed to load config or");
+            return;
         }
 
-        let cors_config = cors_config.unwrap();
+        let cors_config = cors_config.unwrap_or(&CorsConfiguration {
+            allow_all: false,
+            allowed_origins: None,
+        });
 
         if cors_config.allow_all {
             res.set_header(Header::new("Access-Control-Allow-Origin", "*"));
