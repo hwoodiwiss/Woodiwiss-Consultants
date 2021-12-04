@@ -15,13 +15,4 @@ target/
 .vscode
 .idea
 
-# Output from capture example
-wgpu/red.png
-
-# Output from invalid comparison tests
-**/*-actual.png
-**/*-difference.png
-
-# Readme says to check out CTS here
-cts/
 *.secrets.json
