@@ -16,7 +16,6 @@ impl<'r> Responder<'r, 'static> for OptionsResponse {
                     .collect()
             });
         requested_headers.push(String::from("Access-Control-Allowed-Origin"));
-        requested_headers.push(String::from("Access-Control-Allow-Credentials"));
         Response::build()
             .header(Header::new(
                 "Access-Control-Allowed-Methods",
@@ -27,5 +26,15 @@ impl<'r> Responder<'r, 'static> for OptionsResponse {
                 requested_headers.join(", "),
             ))
             .ok()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use rocket::Request;
+
+    #[test]
+    fn options_responder_adds_requested_headers_to_allowed_headers() {
+        const REQUESTED_HEADERS: &str = "Authorization, TestHeader, OHai";
     }
 }
