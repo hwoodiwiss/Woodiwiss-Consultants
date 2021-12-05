@@ -28,13 +28,3 @@ impl<'r> Responder<'r, 'static> for OptionsResponse {
             .ok()
     }
 }
-
-#[cfg(test)]
-mod test {
-    use rocket::Request;
-
-    #[test]
-    fn options_responder_adds_requested_headers_to_allowed_headers() {
-        const REQUESTED_HEADERS: &str = "Authorization, TestHeader, OHai";
-    }
-}
