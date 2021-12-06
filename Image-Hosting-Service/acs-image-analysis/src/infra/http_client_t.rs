@@ -16,7 +16,7 @@ impl StatusCode {
     }
 }
 
-pub trait Response: ResponseSync + ResponseAsync {}
+pub trait Response: ResponseSync + ResponseAsync + Send + Sync {}
 
 pub trait ResponseSync {
     fn status(&self) -> StatusCode;
