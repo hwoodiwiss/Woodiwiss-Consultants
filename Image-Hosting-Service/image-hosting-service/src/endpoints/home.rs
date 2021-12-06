@@ -1,10 +1,9 @@
-use rocket::{Build, Rocket};
-
 use crate::responders::OptionsResponse;
 
-pub fn mount(rocket: Rocket<Build>) -> Rocket<Build> {
-    let rocket = rocket.mount("/", routes![options, index]);
-    rocket
+pub fn stage() -> rocket::fairing::AdHoc {
+    rocket::fairing::AdHoc::on_ignite("Home", |rocket| async {
+        rocket.mount("/", routes![options, index])
+    })
 }
 
 #[options("/")]
