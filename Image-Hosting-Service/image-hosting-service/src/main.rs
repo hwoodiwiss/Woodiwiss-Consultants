@@ -17,6 +17,7 @@ use rocket::{
     figment::{providers::Json, Figment},
     Config,
 };
+use service::{image_analysis, resize, storage_provider};
 
 #[launch]
 fn rocket() -> _ {
@@ -30,4 +31,7 @@ fn rocket() -> _ {
         .attach(CorsMiddleware)
         .attach(home::stage())
         .attach(image::stage())
+        .attach(image_analysis::stage())
+        .attach(resize::stage())
+        .attach(storage_provider::stage())
 }

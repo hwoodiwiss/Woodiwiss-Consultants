@@ -11,6 +11,7 @@ serde = {version = "1.0.130", features = ["derive"]}
 figment = { version = "0.10.6", features = ["env", "toml", "json"] }
 image = "0.23.14"
 acs-image-analysis = { path = "../acs-image-analysis" }
+uuid = { version = "0.8.2", features = ["v4"] }
 
 
 [dev-dependencies]
