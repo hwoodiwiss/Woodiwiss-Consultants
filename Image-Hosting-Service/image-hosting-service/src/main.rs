@@ -8,7 +8,7 @@ mod service;
 extern crate rocket;
 
 use data::config::AppConfiguration;
-use endpoints::home;
+use endpoints::{home, image};
 use figment::providers::{Format, Serialized};
 use middleware::CorsMiddleware;
 use rocket::{
@@ -24,10 +24,9 @@ fn rocket() -> _ {
         .merge(Json::file("config.json"))
         .merge(Json::file("config.secrets.json"));
 
-    let rocket = rocket::custom(figment)
+    rocket::custom(figment)
         .attach(AdHoc::config::<AppConfiguration>())
-        .attach(CorsMiddleware);
-    let rocket = home::mount(rocket);
-
-    rocket
+        .attach(CorsMiddleware)
+        .attach(home::stage())
+        .attach(image::stage())
 }
