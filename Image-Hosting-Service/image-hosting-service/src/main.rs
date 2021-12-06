@@ -1,6 +1,7 @@
 mod data;
 mod endpoints;
 mod fairings;
+mod guards;
 mod responders;
 mod service;
 

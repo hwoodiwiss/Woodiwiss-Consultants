@@ -21,7 +21,7 @@ pub struct ImageSizeConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ApplicationConfig {
+pub struct ApplicationLimits {
     pub max_file_size: u32,
     pub allowed_formats: Vec<String>,
 }
@@ -31,4 +31,5 @@ pub struct AppConfiguration {
     pub image_sizes: HashMap<String, ImageSizeConfig>,
     pub azure_cognitive_services: AzureCognitiveServicesConfig,
     pub cors: CorsConfiguration,
+    pub limits: ApplicationLimits,
 }

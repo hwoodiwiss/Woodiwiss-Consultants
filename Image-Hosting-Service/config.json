@@ -6,5 +6,9 @@
   },
   "cors": {
     "allow_all": false
+  },
+  "limits": {
+    "allowed_formats": ["PNG", "JPG", "BMP", "GIF"],
+    "max_file_size": 4000000
   }
 }
