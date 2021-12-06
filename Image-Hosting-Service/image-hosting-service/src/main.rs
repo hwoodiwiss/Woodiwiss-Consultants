@@ -1,6 +1,6 @@
 mod data;
 mod endpoints;
-mod middleware;
+mod fairings;
 mod responders;
 mod service;
 
@@ -9,8 +9,8 @@ extern crate rocket;
 
 use data::config::AppConfiguration;
 use endpoints::{home, image};
+use fairings::CorsMiddleware;
 use figment::providers::{Format, Serialized};
-use middleware::CorsMiddleware;
 use rocket::{
     fairing::AdHoc,
     figment::{providers::Json, Figment},
