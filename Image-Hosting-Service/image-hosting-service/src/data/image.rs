@@ -4,10 +4,14 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ImageSizeInfo {
-    uri: String,
-    width: u32,
-    height: u32,
+    pub uri: String,
+    pub width: u32,
+    pub height: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ImageResponse(pub HashMap<String, ImageSizeInfo>);
+pub struct ImageResponse {
+    pub id: String,
+    pub image_sizes: HashMap<String, ImageSizeInfo>,
+    pub description: String,
+}
