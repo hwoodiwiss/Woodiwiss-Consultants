@@ -1,0 +1,4 @@
+CREATE TABLE `Images` (
+	Id CHAR(36) NOT NULL PRIMARY KEY,
+	ImageData JSON NOT NULL
+);
