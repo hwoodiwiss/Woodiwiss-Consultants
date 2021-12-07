@@ -16,7 +16,7 @@ extern crate diesel;
 extern crate rocket_sync_db_pools;
 
 use data::config::AppConfiguration;
-use endpoints::{home, image};
+use endpoints::{home, image, images};
 use fairings::CorsMiddleware;
 use figment::providers::{Format, Serialized};
 use rocket::{
@@ -42,6 +42,7 @@ fn rocket() -> _ {
         .attach(ImageDb::fairing())
         .attach(home::stage())
         .attach(image::stage())
+        .attach(images::stage())
         .attach(image_analysis::stage())
         .attach(resize::stage())
         .attach(storage_provider::stage())
