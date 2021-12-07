@@ -14,5 +14,10 @@ acs-image-analysis = { path = "../acs-image-analysis" }
 uuid = { version = "0.8.2", features = ["v4"] }
 
 
+[dependencies.rocket_sync_db_pools]
+version = "0.1.0-rc.1"
+default-features = false
+features = ["diesel_mysql_pool"]
+
 [dev-dependencies]
 tokio = { version = "1.14.0", features = ["rt", "macros"] }
