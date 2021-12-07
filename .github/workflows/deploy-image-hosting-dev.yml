@@ -34,16 +34,22 @@ jobs:
         working-directory: ./Image-Hosting-Service/
     steps:
       - uses: actions/checkout@v2
+      - name: Deploy Secrets
+        env:
+          SETTINGS: ${{ secrets.IHS_SECRETS_CONFIG_DEV }}
+        run: |
+          echo "$SETTINGS" > settings.b64
+          cat settings.b64 | base64 -d > ./target/release/config.secrets.json
       - name: Build
-        run: cargo build --release
-      # Need to work out the specifics of deploying the rust executable
-      # Ssh is probs the best bet
-      # May need to x-compile for a specific target to match the uni env
-      # - name: Deploy Application
-      #   uses: SamKirkland/FTP-Deploy-Action@4.2.0
-      #   with:
-      #     server: ${{ secrets.FTP_SERVER }}
-      #     username: ${{ secrets.FTP_USER }}
-      #     password: ${{ secrets.FTP_PASSWORD }}
-      #     local-dir: ./Woodiwiss-Consultants-Web/dist/woodiwiss-consultants-web/
-      #     server-dir: ./dev/ui/
+        run: |
+          cargo build --release
+          cp ./target/release/image-hosting-service ./dist
+          cp ./*.json ./dist
+      - name: Deploy Application
+        uses: SamKirkland/FTP-Deploy-Action@4.2.0
+        with:
+          server: ${{ secrets.VPS_SERVER }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          local-dir: ./Image-Hosting-Service/dist/
+          server-dir: /usr/bin/ihs-app/
