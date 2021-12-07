@@ -658,6 +658,7 @@ name = "image-hosting-service"
 version = "0.1.0"
 dependencies = [
  "acs-image-analysis",
+ "diesel",
  "figment",
  "image",
  "rocket",

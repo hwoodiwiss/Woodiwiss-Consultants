@@ -1,4 +1,5 @@
 mod data;
+mod database;
 mod endpoints;
 mod fairings;
 mod guards;
@@ -7,6 +8,12 @@ mod service;
 
 #[macro_use]
 extern crate rocket;
+
+#[macro_use]
+extern crate diesel;
+
+#[macro_use]
+extern crate rocket_sync_db_pools;
 
 use data::config::AppConfiguration;
 use endpoints::{home, image};
@@ -17,7 +24,6 @@ use rocket::{
     figment::{providers::Json, Figment},
     Config,
 };
-use rocket_sync_db_pools::{database, diesel};
 use service::{image_analysis, resize, storage_provider};
 //
 #[database("image_database")]
