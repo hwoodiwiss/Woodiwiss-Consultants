@@ -58,7 +58,7 @@ impl StorageProvider {
             .map_err(|err| map_image_error_to_storage_error(&err))?;
         let image_dimensions = image.dimensions();
         Ok(ImageSizeInfo {
-            uri: format!("/image/{}/{}.jpg", id, size),
+            uri: format!("/image/{}/{}", id, size),
             width: image_dimensions.0,
             height: image_dimensions.1,
         })
