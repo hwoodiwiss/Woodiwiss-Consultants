@@ -38,8 +38,9 @@ jobs:
         env:
           SETTINGS: ${{ secrets.IHS_SECRETS_CONFIG_DEV }}
         run: |
+          mkdir dist
           echo "$SETTINGS" > settings.b64
-          cat settings.b64 | base64 -d > ./target/release/config.secrets.json
+          cat settings.b64 | base64 -d > config.secrets.json
       - name: Build
         run: |
           cargo build --release
