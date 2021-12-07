@@ -2,21 +2,24 @@ use std::collections::HashMap;
 
 use acs_image_analysis::ImageAnalysisError;
 
+use diesel::{ExpressionMethods, RunQueryDsl};
 use rocket::{
     http::{self},
-    serde::json::Json,
+    serde::{self, json::Json},
     State,
 };
 use uuid::Uuid;
 
 use crate::{
     data::image::{ImageResponse, ImageSizeInfo},
+    database::{self, Images::dsl::*},
     guards::RequestImage,
     responders::ApiResponse,
     service::{
         image_analysis::ImageAnalysisService, resize::ResizeService,
         storage_provider::StorageProvider,
     },
+    ImageDb,
 };
 
 pub fn stage() -> rocket::fairing::AdHoc {
@@ -38,12 +41,14 @@ fn map_analysis_error_to_status(err: &ImageAnalysisError) -> http::Status {
 /// A thin wrapper around the actual functionality to improve IDE support.
 #[post("/image", data = "<request_image>")]
 async fn post_image_endpoint(
+    db_conn: ImageDb,
     analysis_service: &State<ImageAnalysisService>,
     resize_service: &State<ResizeService>,
     storage_provider: &State<StorageProvider>,
     request_image: RequestImage,
 ) -> ApiResponse<Json<ImageResponse>> {
     post_image(
+        db_conn,
         analysis_service,
         resize_service,
         storage_provider,
@@ -54,6 +59,7 @@ async fn post_image_endpoint(
 
 #[inline]
 async fn post_image(
+    db_conn: ImageDb,
     analysis_service: &State<ImageAnalysisService>,
     resize_service: &State<ResizeService>,
     storage_provider: &State<StorageProvider>,
@@ -90,9 +96,29 @@ async fn post_image(
             Err(_) => return ApiResponse(Err(http::Status::InternalServerError)),
         },
     );
-    ApiResponse(Ok(Json(ImageResponse {
-        id,
+    let response = ImageResponse {
+        id: id.clone(),
         image_sizes: image_sizes.clone(),
         description: description.clone(),
-    })))
+    };
+    let image_size_json = match serde::json::serde_json::to_string(&image_sizes.clone()) {
+        Ok(res) => res,
+        Err(_) => return ApiResponse(Err(http::Status::InternalServerError)),
+    };
+    let row_vals = (
+        Id.eq(id),
+        ImageData.eq(image_size_json),
+        Description.eq(description.clone()),
+    );
+    match db_conn
+        .run(move |conn| {
+            diesel::insert_into(database::Images::dsl::Images)
+                .values(&row_vals)
+                .execute(conn)
+        })
+        .await
+    {
+        Ok(_) => ApiResponse(Ok(Json(response))),
+        Err(_) => ApiResponse(Err(http::Status::InternalServerError)),
+    }
 }
