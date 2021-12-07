@@ -17,7 +17,11 @@ use rocket::{
     figment::{providers::Json, Figment},
     Config,
 };
+use rocket_sync_db_pools::{database, diesel};
 use service::{image_analysis, resize, storage_provider};
+//
+#[database("image_database")]
+pub struct ImageDb(diesel::MysqlConnection);
 
 #[launch]
 fn rocket() -> _ {
@@ -29,6 +33,7 @@ fn rocket() -> _ {
     rocket::custom(figment)
         .attach(AdHoc::config::<AppConfiguration>())
         .attach(CorsMiddleware)
+        .attach(ImageDb::fairing())
         .attach(home::stage())
         .attach(image::stage())
         .attach(image_analysis::stage())
