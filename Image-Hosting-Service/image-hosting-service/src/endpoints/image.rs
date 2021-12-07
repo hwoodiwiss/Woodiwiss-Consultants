@@ -2,17 +2,25 @@ use std::collections::HashMap;
 
 use acs_image_analysis::ImageAnalysisError;
 
-use diesel::{ExpressionMethods, RunQueryDsl};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::{
-    http::{self},
+    fs::NamedFile,
+    http::{self, Status},
+    response,
     serde::{self, json::Json},
     State,
 };
 use uuid::Uuid;
 
 use crate::{
-    data::image::{ImageResponse, ImageSizeInfo},
-    database::{self, Images::dsl::*},
+    data::{
+        image::{ImageResponse, ImageSizeInfo},
+        view_model::ImageDbModel,
+    },
+    database::{
+        self,
+        Images::dsl::{self, *},
+    },
     guards::RequestImage,
     responders::{ApiResponse, OptionsResponse},
     service::{
@@ -24,7 +32,7 @@ use crate::{
 
 pub fn stage() -> rocket::fairing::AdHoc {
     rocket::fairing::AdHoc::on_ignite("Image", |rocket| async {
-        rocket.mount("/", routes![post_image_endpoint, options])
+        rocket.mount("/", routes![post_image, get_image, options])
     })
 }
 
@@ -47,14 +55,14 @@ async fn options() -> OptionsResponse {
 
 /// A thin wrapper around the actual functionality to improve IDE support.
 #[post("/image", data = "<request_image>")]
-async fn post_image_endpoint(
+async fn post_image(
     db_conn: ImageDb,
     analysis_service: &State<ImageAnalysisService>,
     resize_service: &State<ResizeService>,
     storage_provider: &State<StorageProvider>,
     request_image: RequestImage,
 ) -> ApiResponse<Json<ImageResponse>> {
-    post_image(
+    post_image_internal(
         db_conn,
         analysis_service,
         resize_service,
@@ -65,7 +73,7 @@ async fn post_image_endpoint(
 }
 
 #[inline]
-async fn post_image(
+async fn post_image_internal(
     db_conn: ImageDb,
     analysis_service: &State<ImageAnalysisService>,
     resize_service: &State<ResizeService>,
@@ -127,5 +135,40 @@ async fn post_image(
     {
         Ok(_) => ApiResponse(Ok(Json(response))),
         Err(_) => ApiResponse(Err(http::Status::InternalServerError)),
+    }
+}
+
+#[get("/image/<id>/<size>")]
+async fn get_image(
+    db_conn: ImageDb,
+    id: String,
+    size: String,
+) -> response::status::Custom<Option<NamedFile>> {
+    get_image_internal(db_conn, &id, &size).await
+}
+
+#[inline]
+async fn get_image_internal(
+    db_conn: ImageDb,
+    id: &String,
+    size: &String,
+) -> response::status::Custom<Option<NamedFile>> {
+    let qry_id = id.clone();
+    //Returns not found if not found in the database
+    let _ = match db_conn
+        .run(|conn| {
+            dsl::Images
+                .filter(&dsl::Id.eq(qry_id))
+                .first::<ImageDbModel>(conn)
+        })
+        .await
+    {
+        Ok(item) => item,
+        Err(_) => return response::status::Custom(Status::NotFound, None),
+    };
+
+    match NamedFile::open(format!("./images/{}/{}.jpg", id, size).as_str()).await {
+        Ok(file) => response::status::Custom(Status::Ok, Some(file)),
+        Err(_) => response::status::Custom(Status::NotFound, None),
     }
 }
