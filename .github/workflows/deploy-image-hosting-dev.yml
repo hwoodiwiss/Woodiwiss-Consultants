@@ -54,3 +54,12 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           local-dir: ./Image-Hosting-Service/dist/
           server-dir: ~/ihs-app/
+      - name: Mark Application Executable
+        uses: appleboy/ssh-action@master
+        with:
+          server: ${{ secrets.VPS_SERVER }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd ~/ihs-app/
+            chmod +X image-hosting-service
