@@ -53,4 +53,4 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           local-dir: ./Image-Hosting-Service/dist/
-          server-dir: /usr/bin/ihs-app/
+          server-dir: ~/ihs-app/
