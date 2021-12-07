@@ -26,6 +26,7 @@ async fn get_images(db_pool: ImageDb) -> json::Json<Vec<ImageViewModel>> {
     get_images_internal(db_pool).await
 }
 
+#[inline]
 async fn get_images_internal(db_pool: ImageDb) -> json::Json<Vec<ImageViewModel>> {
     let db_items = db_pool
         .run(|conn| Images.load::<ImageDbModel>(conn))
