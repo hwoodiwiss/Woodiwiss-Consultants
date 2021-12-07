@@ -12,6 +12,7 @@ table! {
     Images (Id) {
         Id -> Char,
         ImageData -> Longtext,
+        Description -> Char,
     }
 }
 
