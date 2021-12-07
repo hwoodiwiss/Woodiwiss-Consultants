@@ -6,7 +6,7 @@ use crate::{
 };
 use diesel::prelude::*;
 
-use rocket::serde::json;
+use rocket::{http::Status, response::status, serde::json};
 
 pub fn stage() -> rocket::fairing::AdHoc {
     rocket::fairing::AdHoc::on_ignite("Images", |rocket| async {
@@ -22,24 +22,28 @@ async fn options() -> OptionsResponse {
 }
 
 #[get("/images")]
-async fn get_images(db_pool: ImageDb) -> json::Json<Vec<ImageViewModel>> {
+async fn get_images(db_pool: ImageDb) -> status::Custom<Option<json::Json<Vec<ImageViewModel>>>> {
     get_images_internal(db_pool).await
 }
 
 #[inline]
-async fn get_images_internal(db_pool: ImageDb) -> json::Json<Vec<ImageViewModel>> {
-    let db_items = db_pool
-        .run(|conn| Images.load::<ImageDbModel>(conn))
-        .await
-        .expect("Failed to read values from database");
-    json::Json(
-        db_items
-            .into_iter()
-            .map(|item| ImageViewModel {
-                image_sizes: json::from_str(item.image_data.as_str())
-                    .expect("Invalid json in database"),
-                description: item.description,
-            })
-            .collect(),
-    )
+async fn get_images_internal(
+    db_pool: ImageDb,
+) -> status::Custom<Option<json::Json<Vec<ImageViewModel>>>> {
+    match db_pool.run(|conn| Images.load::<ImageDbModel>(conn)).await {
+        Ok(db_items) => status::Custom(
+            Status::Ok,
+            Some(json::Json(
+                db_items
+                    .into_iter()
+                    .map(|item| ImageViewModel {
+                        image_sizes: json::from_str(item.image_data.as_str())
+                            .expect("Invalid json in database"),
+                        description: item.description,
+                    })
+                    .collect(),
+            )),
+        ),
+        Err(_) => status::Custom(Status::InternalServerError, None),
+    }
 }
