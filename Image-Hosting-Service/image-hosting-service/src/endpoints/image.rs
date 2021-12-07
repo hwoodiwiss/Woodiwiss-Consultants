@@ -14,7 +14,7 @@ use crate::{
     data::image::{ImageResponse, ImageSizeInfo},
     database::{self, Images::dsl::*},
     guards::RequestImage,
-    responders::ApiResponse,
+    responders::{ApiResponse, OptionsResponse},
     service::{
         image_analysis::ImageAnalysisService, resize::ResizeService,
         storage_provider::StorageProvider,
@@ -24,7 +24,7 @@ use crate::{
 
 pub fn stage() -> rocket::fairing::AdHoc {
     rocket::fairing::AdHoc::on_ignite("Image", |rocket| async {
-        rocket.mount("/", routes![post_image_endpoint])
+        rocket.mount("/", routes![post_image_endpoint, options])
     })
 }
 
@@ -35,6 +35,13 @@ fn map_analysis_error_to_status(err: &ImageAnalysisError) -> http::Status {
         ImageAnalysisError::UnexpectedResponseFormat(_) => http::Status::InternalServerError,
         ImageAnalysisError::HttpError(_) => http::Status::InternalServerError,
         ImageAnalysisError::ServiceError => http::Status::InternalServerError,
+    }
+}
+
+#[options("/image")]
+async fn options() -> OptionsResponse {
+    OptionsResponse {
+        allowed_methods: vec!["GET", "POST", "OPTIONS"],
     }
 }
 
@@ -105,7 +112,7 @@ async fn post_image(
         Ok(res) => res,
         Err(_) => return ApiResponse(Err(http::Status::InternalServerError)),
     };
-    let row_vals = (
+    let image_row = (
         Id.eq(id),
         ImageData.eq(image_size_json),
         Description.eq(description.clone()),
@@ -113,7 +120,7 @@ async fn post_image(
     match db_conn
         .run(move |conn| {
             diesel::insert_into(database::Images::dsl::Images)
-                .values(&row_vals)
+                .values(&image_row)
                 .execute(conn)
         })
         .await
