@@ -1,8 +1,10 @@
-name: Test & Deploy Dev Image Hosting Service
+name: Test & Deploy Image Hosting Service
 
 on:
-  pull_request:
+  push:
     paths: "Image-Hosting-Service/**"
+    branches:
+      - main
 
 jobs:
   Unit_Test:
