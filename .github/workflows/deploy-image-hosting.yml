@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Deploy Secrets
         env:
-          SETTINGS: ${{ secrets.IHS_SECRETS_CONFIG_DEV }}
+          SETTINGS: ${{ secrets.IHS_SECRETS_CONFIG_LIVE }}
         run: |
           mkdir dist
           echo "$SETTINGS" > settings.b64
