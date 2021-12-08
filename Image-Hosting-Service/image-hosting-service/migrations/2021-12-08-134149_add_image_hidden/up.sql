@@ -1,0 +1,1 @@
+ALTER TABLE `Images` ADD `Hidden` BIT NOT NULL DEFAULT 0;

@@ -13,6 +13,7 @@ table! {
         Id -> Char,
         ImageData -> Longtext,
         Description -> Char,
+        Hidden -> Bit,
     }
 }
 
