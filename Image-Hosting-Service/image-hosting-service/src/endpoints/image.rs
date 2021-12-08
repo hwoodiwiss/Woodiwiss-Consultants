@@ -17,10 +17,7 @@ use crate::{
         image::{ImageResponse, ImageSizeInfo},
         view_model::ImageDbModel,
     },
-    database::{
-        self,
-        Images::dsl::{self, *},
-    },
+    database::{self, Images::dsl},
     guards::RequestImage,
     responders::{ApiResponse, OptionsResponse},
     service::{
@@ -54,13 +51,14 @@ async fn options() -> OptionsResponse {
 }
 
 /// A thin wrapper around the actual functionality to improve IDE support.
-#[post("/image", data = "<request_image>")]
+#[post("/image?<hidden>", data = "<request_image>")]
 async fn post_image(
     db_conn: ImageDb,
     analysis_service: &State<ImageAnalysisService>,
     resize_service: &State<ResizeService>,
     storage_provider: &State<StorageProvider>,
     request_image: RequestImage,
+    hidden: Option<bool>,
 ) -> ApiResponse<Json<ImageResponse>> {
     post_image_internal(
         db_conn,
@@ -68,6 +66,7 @@ async fn post_image(
         resize_service,
         storage_provider,
         request_image,
+        hidden,
     )
     .await
 }
@@ -79,7 +78,9 @@ async fn post_image_internal(
     resize_service: &State<ResizeService>,
     storage_provider: &State<StorageProvider>,
     request_image: RequestImage,
+    hidden: Option<bool>,
 ) -> ApiResponse<Json<ImageResponse>> {
+    let hidden = hidden.unwrap_or(false);
     let image_analysis = analysis_service
         .get_description(&request_image.bytes[..])
         .await;
@@ -121,9 +122,10 @@ async fn post_image_internal(
         Err(_) => return ApiResponse(Err(http::Status::InternalServerError)),
     };
     let image_row = (
-        Id.eq(id),
-        ImageData.eq(image_size_json),
-        Description.eq(description.clone()),
+        dsl::Id.eq(id),
+        dsl::ImageData.eq(image_size_json),
+        dsl::Description.eq(description.clone()),
+        dsl::Hidden.eq(hidden),
     );
     match db_conn
         .run(move |conn| {
