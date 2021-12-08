@@ -30,7 +30,14 @@ async fn get_images(db_pool: ImageDb) -> status::Custom<Option<json::Json<Vec<Im
 async fn get_images_internal(
     db_pool: ImageDb,
 ) -> status::Custom<Option<json::Json<Vec<ImageViewModel>>>> {
-    match db_pool.run(|conn| dsl::Images.filter(&dsl::Hidden.eq(false)).load::<ImageDbModel>(conn)).await {
+    match db_pool
+        .run(|conn| {
+            dsl::Images
+                .filter(&dsl::Hidden.eq(false))
+                .load::<ImageDbModel>(conn)
+        })
+        .await
+    {
         Ok(db_items) => status::Custom(
             Status::Ok,
             Some(json::Json(
