@@ -46,6 +46,14 @@ jobs:
           cargo build --release
           cp ./target/release/image-hosting-service ./dist
           cp ./*.json ./dist
+      - name: Stop Image Hosting Service
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_SERVER }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S service image-hosting stop
       - name: Deploy Application
         uses: SamKirkland/FTP-Deploy-Action@4.2.0
         with:
@@ -54,12 +62,13 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           local-dir: ./Image-Hosting-Service/dist/
           server-dir: ./ihs-app/
-      - name: Mark Application Executable
+      - name: Restart Image Hosting Service
         uses: appleboy/ssh-action@master
         with:
-          server: ${{ secrets.VPS_SERVER }}
+          host: ${{ secrets.VPS_SERVER }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd ~/ihs-app/
             chmod +x image-hosting-service
+            echo "${{ secrets.VPS_PASSWORD }}" | sudo -S service image-hosting start
