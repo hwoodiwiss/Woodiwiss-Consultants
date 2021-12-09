@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SharedTestingModule } from '../shared/shared-testing.module';
 
-import { GalleryPageComponent } from './gallery-page.component';
+import { GalleryPageComponent } from './image-hosting.component';
 
 describe('GalleryPageComponent', () => {
 	let component: GalleryPageComponent;

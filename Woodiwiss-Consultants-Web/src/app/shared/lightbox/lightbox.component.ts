@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { AppImage } from 'src/app/app-images';
 
 @Component({
 	selector: 'wcw-lightbox',
 	templateUrl: './lightbox.component.html',
 	styleUrls: ['./lightbox.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LightboxComponent {
 	@Input() images: AppImage[];

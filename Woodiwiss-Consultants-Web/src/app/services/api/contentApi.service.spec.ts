@@ -5,7 +5,8 @@ import { ContentApiService } from './contentApi.service';
 
 describe('ContentApiService tests', () => {
 	const testConfig: AppConfig = {
-		ApiUri: 'http://localhost:8000',
+		CmsApiUri: 'http://localhost:8000',
+		ImageApiUri: '',
 	};
 
 	const mockHttpClient = {
@@ -48,12 +49,12 @@ describe('ContentApiService tests', () => {
 			recaptchaToken,
 		};
 		service.update(expectedId, expectedContent, recaptchaToken);
-		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.ApiUri}/Content/Update`, expectModel);
+		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.CmsApiUri}/Content/Update`, expectModel);
 	});
 
 	it('get should get from the content get endpoint', () => {
 		const expectedId = 'id';
 		service.get(expectedId);
-		expect(mockHttpClient.get).toBeCalledWith(`${testConfig.ApiUri}/Content/Get?id=${expectedId}`);
+		expect(mockHttpClient.get).toBeCalledWith(`${testConfig.CmsApiUri}/Content/Get?id=${expectedId}`);
 	});
 });

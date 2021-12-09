@@ -6,7 +6,8 @@ import { ContactApiService } from './contactApi.service';
 
 describe('ContactApiService tests', () => {
 	const testConfig: AppConfig = {
-		ApiUri: 'http://localhost:8000',
+		CmsApiUri: 'http://localhost:8000',
+		ImageApiUri: '',
 	};
 
 	const mockHttpClient = {
@@ -54,6 +55,6 @@ describe('ContactApiService tests', () => {
 
 		service.submitContactForm(expectedFormModel);
 
-		expect(mockHttpClient.post).toBeCalledWith(testConfig.ApiUri + '/Contact/Send', expectedFormModel);
+		expect(mockHttpClient.post).toBeCalledWith(testConfig.CmsApiUri + '/Contact/Send', expectedFormModel);
 	});
 });

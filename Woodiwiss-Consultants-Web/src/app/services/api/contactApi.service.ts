@@ -10,6 +10,6 @@ export class ContactApiService {
 	constructor(@Inject(APP_CONFIG) private config: AppConfig, private httpClient: HttpClient) {}
 
 	public submitContactForm(model: ContactFormModel) {
-		return this.httpClient.post(`${this.config.ApiUri}/Contact/Send`, model);
+		return this.httpClient.post(`${this.config.CmsApiUri}/Contact/Send`, model);
 	}
 }

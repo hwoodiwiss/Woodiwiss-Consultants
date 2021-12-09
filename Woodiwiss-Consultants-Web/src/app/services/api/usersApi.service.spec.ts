@@ -6,7 +6,8 @@ import { DeleteUserFormModel, NewUserFormModel, UpdateUserFormModel } from './Us
 
 describe('UsersApiService tests', () => {
 	const testConfig: AppConfig = {
-		ApiUri: 'http://localhost:8000',
+		CmsApiUri: 'http://localhost:8000',
+		ImageApiUri: '',
 	};
 
 	const mockHttpClient = {
@@ -47,7 +48,7 @@ describe('UsersApiService tests', () => {
 			recaptchaToken: 'rt',
 		};
 		service.add(expectModel);
-		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.ApiUri}/User/Add`, expectModel);
+		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.CmsApiUri}/User/Add`, expectModel);
 	});
 
 	it('update should post to the users update endpoint with the provided model', () => {
@@ -60,7 +61,7 @@ describe('UsersApiService tests', () => {
 			recaptchaToken: 'rt',
 		};
 		service.update(expectModel);
-		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.ApiUri}/User/Update`, expectModel);
+		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.CmsApiUri}/User/Update`, expectModel);
 	});
 
 	it('delete should post to the users delete endpoint with the provided model', () => {
@@ -69,11 +70,11 @@ describe('UsersApiService tests', () => {
 			recaptchaToken: 'rt',
 		};
 		service.delete(expectModel);
-		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.ApiUri}/User/Delete`, expectModel);
+		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.CmsApiUri}/User/Delete`, expectModel);
 	});
 
 	it('list should get from the users list endpoint', () => {
 		service.list();
-		expect(mockHttpClient.get).toBeCalledWith(`${testConfig.ApiUri}/User/List`);
+		expect(mockHttpClient.get).toBeCalledWith(`${testConfig.CmsApiUri}/User/List`);
 	});
 });

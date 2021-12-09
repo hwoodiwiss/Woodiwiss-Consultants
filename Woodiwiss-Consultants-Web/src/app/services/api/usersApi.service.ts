@@ -11,18 +11,18 @@ export class UsersApiService {
 	constructor(@Inject(APP_CONFIG) private config: AppConfig, private httpClient: HttpClient) {}
 
 	public add(model: NewUserFormModel) {
-		return this.httpClient.post<User>(`${this.config.ApiUri}/User/Add`, model);
+		return this.httpClient.post<User>(`${this.config.CmsApiUri}/User/Add`, model);
 	}
 
 	public update(model: UpdateUserFormModel) {
-		return this.httpClient.post<User>(`${this.config.ApiUri}/User/Update`, model);
+		return this.httpClient.post<User>(`${this.config.CmsApiUri}/User/Update`, model);
 	}
 
 	public list() {
-		return this.httpClient.get<User[]>(`${this.config.ApiUri}/User/List`);
+		return this.httpClient.get<User[]>(`${this.config.CmsApiUri}/User/List`);
 	}
 
 	public delete(model: DeleteUserFormModel) {
-		return this.httpClient.post<null>(`${this.config.ApiUri}/User/Delete`, model);
+		return this.httpClient.post<null>(`${this.config.CmsApiUri}/User/Delete`, model);
 	}
 }
