@@ -4,7 +4,8 @@
 
 export const environment = {
 	production: false,
-	apiUri: 'https://dev.cms.WS311470.remote.ac',
+	cmsApiUri: 'https://dev.cms.WS311470.remote.ac',
+	imageApiUri: 'https://image-hosting.hwoodiwiss.com',
 	recaptchaPublic: '6LdAIoUaAAAAAEFMhciNrRJKvyPYDlvTQDUPCyTG',
 };
 

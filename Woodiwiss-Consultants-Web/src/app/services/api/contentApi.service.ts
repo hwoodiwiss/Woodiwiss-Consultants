@@ -13,11 +13,11 @@ export class ContentApiService {
 	constructor(@Inject(APP_CONFIG) private config: AppConfig, private httpClient: HttpClient) {}
 
 	public get(id: string) {
-		return this.httpClient.get<ContentModel>(`${this.config.ApiUri}/Content/Get?id=${id}`);
+		return this.httpClient.get<ContentModel>(`${this.config.CmsApiUri}/Content/Get?id=${id}`);
 	}
 
 	public update(id: string, content: string, recaptchaToken: string) {
-		return this.httpClient.post(`${this.config.ApiUri}/Content/Update`, {
+		return this.httpClient.post(`${this.config.CmsApiUri}/Content/Update`, {
 			id,
 			content,
 			recaptchaToken,

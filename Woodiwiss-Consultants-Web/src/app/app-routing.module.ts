@@ -4,7 +4,7 @@ import { AboutPageComponent } from './about-page/about-page.component';
 import { AdminGuardService } from './services/admin-guard.service';
 import { AdminPageComponent } from './admin-page/admin-page.component';
 import { ContactPageComponent } from './contact-page/contact-page.component';
-import { GalleryPageComponent } from './gallery-page/gallery-page.component';
+import { GalleryPageComponent } from './image-hosting/image-hosting.component';
 import { HomePageComponent } from './home-page/home-page.component';
 import { NotFoundPageComponent } from './not-found-page/not-found-page.component';
 import { ServicesPageComponent } from './services-page/services-page.component';

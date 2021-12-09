@@ -6,7 +6,8 @@ import { AccountApiService } from './accountApi.service';
 
 describe('AccountApiService tests', () => {
 	const testConfig: AppConfig = {
-		ApiUri: 'http://localhost:8000',
+		CmsApiUri: 'http://localhost:8000',
+		ImageApiUri: '',
 	};
 
 	const mockHttpClient = {
@@ -44,16 +45,16 @@ describe('AccountApiService tests', () => {
 			recaptchaToken: 'rt',
 		};
 		service.login(expectModel);
-		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.ApiUri}/Account/Login`, expectModel);
+		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.CmsApiUri}/Account/Login`, expectModel);
 	});
 
 	it('logout should post to the account logout endpoint with no body', () => {
 		service.logout();
-		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.ApiUri}/Account/Logout`, null);
+		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.CmsApiUri}/Account/Logout`, null);
 	});
 
 	it('refresh should post to the account refresh endpoint with no body, and retrieve the direct http response', () => {
 		service.refresh();
-		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.ApiUri}/Account/Refresh`, null, { observe: 'response' });
+		expect(mockHttpClient.post).toBeCalledWith(`${testConfig.CmsApiUri}/Account/Refresh`, null, { observe: 'response' });
 	});
 });

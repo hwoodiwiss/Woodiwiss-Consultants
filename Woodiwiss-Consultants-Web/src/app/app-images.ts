@@ -1,10 +1,10 @@
-import { InjectionToken } from '@angular/core';
+export interface AppImage {
+	description: string;
+	image_sizes: { [key: string]: AppImageSize };
+}
 
-export type AppImage = [string, string, string];
-
-export const APP_IMAGES = new InjectionToken<AppImage[]>('app.images', {
-	providedIn: 'root',
-	factory: (): AppImage[] => {
-		return [['/assets/images/placeholder.png', 'A Placeholder', 'Placeholder']];
-	},
-});
+interface AppImageSize {
+	uri: string;
+	width: number;
+	height: number;
+}

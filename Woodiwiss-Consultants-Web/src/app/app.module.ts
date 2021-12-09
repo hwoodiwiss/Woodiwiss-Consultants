@@ -13,7 +13,7 @@ import { ServicesPageModule } from './services-page/services-page.module';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CredentialsInterceptor } from './services/CredentialsInterceptor';
 import { LoginPageModule } from './login-page/login-page.module';
-import { GalleryPageModule } from './gallery-page/gallery-page.module';
+import { GalleryPageModule } from './image-hosting/image-hosting.module';
 
 @NgModule({
 	declarations: [AppComponent],
