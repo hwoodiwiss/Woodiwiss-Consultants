@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { AppImage } from 'src/app/app-images';
 
 @Component({
 	selector: 'wcw-image-carousel',
 	templateUrl: './image-carousel.component.html',
 	styleUrls: ['./image-carousel.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImageCarouselComponent {
 	@Input() images: AppImage[];

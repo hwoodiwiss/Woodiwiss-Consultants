@@ -1,6 +1,8 @@
 <div class="grid-base wide">
 	<div class="row">
-		<wcw-image-carousel [images]="images"></wcw-image-carousel>
+		<wcw-image-carousel
+			[images]="imageService.images | async"
+		></wcw-image-carousel>
 	</div>
 
 	<wcw-content-editor

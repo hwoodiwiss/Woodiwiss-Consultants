@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { AppImage, APP_IMAGES } from '../app-images';
+import { AppImage } from '../app-images';
+import { ImageService } from '../services/image.service';
 
 @Component({
 	selector: 'wcw-image-hosting',
@@ -7,7 +8,7 @@ import { AppImage, APP_IMAGES } from '../app-images';
 	styleUrls: ['./image-hosting.component.scss'],
 })
 export class GalleryPageComponent implements OnInit {
-	constructor(@Inject(APP_IMAGES) public images: AppImage[]) {}
+	constructor(public imageService: ImageService) {}
 
 	ngOnInit(): void {}
 }

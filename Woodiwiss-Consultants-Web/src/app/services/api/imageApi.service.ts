@@ -10,7 +10,7 @@ export class ImageApiService {
 	constructor(@Inject(APP_CONFIG) private config: AppConfig, private httpClient: HttpClient) {}
 
 	public images() {
-		return this.httpClient.get<AppImage[]>(`${this.config.ImageApiUri}/images`);
+		return this.httpClient.get<AppImage[]>(`${this.config.ImageApiUri}/images`, { withCredentials: false });
 	}
 
 	public add_image(binImage: Uint8Array) {
