@@ -4,10 +4,66 @@ import { AppImage } from 'src/app/app-images';
 import { LightboxComponent } from './lightbox.component';
 
 const testImages: AppImage[] = [
-	['Path1', 'Alt1', ''],
-	['Path2', 'Alt2', ''],
-	['Path3', 'Alt3', ''],
-	['Path4', 'Alt4', ''],
+	{
+		description: 'Alt1',
+		image_sizes: {
+			thumbnail: {
+				uri: 'Path1/thumb',
+				width: 200,
+				height: 200,
+			},
+			optimal: {
+				uri: 'Path1/optimal',
+				width: 1920,
+				height: 200,
+			},
+		},
+	},
+	{
+		description: 'Alt2',
+		image_sizes: {
+			thumbnail: {
+				uri: 'Path2/thumb',
+				width: 200,
+				height: 200,
+			},
+			optimal: {
+				uri: 'Path2/optimal',
+				width: 1920,
+				height: 200,
+			},
+		},
+	},
+	{
+		description: 'Alt3',
+		image_sizes: {
+			thumbnail: {
+				uri: 'Path3/thumb',
+				width: 200,
+				height: 200,
+			},
+			optimal: {
+				uri: 'Path3/optimal',
+				width: 1920,
+				height: 200,
+			},
+		},
+	},
+	{
+		description: 'Alt4',
+		image_sizes: {
+			thumbnail: {
+				uri: 'Path4/thumb',
+				width: 200,
+				height: 200,
+			},
+			optimal: {
+				uri: 'Path4/optimal',
+				width: 1920,
+				height: 200,
+			},
+		},
+	},
 ];
 
 describe('LightboxComponent', () => {

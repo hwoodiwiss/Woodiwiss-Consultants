@@ -33,6 +33,7 @@ class ContentManagementApi
 		$this->method = $_SERVER['REQUEST_METHOD'];
 		$localSettingsFile = __DIR__ . '/../settings.local.secrets.ini';
 		$settingsFile = __DIR__ . '/../settings.ini';
+
 		if (file_exists($localSettingsFile)) {
 			$this->config = AppConfig::from($localSettingsFile);
 		}
