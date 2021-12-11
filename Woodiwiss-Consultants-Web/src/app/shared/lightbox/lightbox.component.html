@@ -6,10 +6,10 @@
 		(keydown.enter)="openLightbox(i)"
 	>
 		<img
-			[src]="image[0]"
+			[src]="image.image_sizes['thumbnail'].uri"
 			(click)="openLightbox(i)"
 			class="hover-shadow preview"
-			[alt]="image[1]"
+			[alt]="image.description"
 		/>
 	</div>
 </div>
@@ -31,7 +31,7 @@
 				"
 			>
 				<img
-					[src]="image.image_sizes['thumbnail'].uri"
+					[src]="image.image_sizes['optimal'].uri"
 					class="image-slide"
 					[alt]="image.description"
 				/>
