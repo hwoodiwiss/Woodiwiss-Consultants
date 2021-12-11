@@ -12,8 +12,8 @@
 >
 	<img
 		*ngFor="let image of images; let i = index"
-		[src]="image[0]"
-		[alt]="image[1]"
+		[src]="image.image_sizes['optimal'].uri"
+		[alt]="image.description"
 		[attr.class]="getClassForIndex(i)"
 	/>
 </div>

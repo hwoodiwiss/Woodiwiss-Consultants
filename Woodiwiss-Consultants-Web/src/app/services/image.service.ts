@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 import { AppImage } from '../app-images';
 import { ImageApiService } from './api/imageApi.service';
 
@@ -14,8 +15,13 @@ export class ImageService {
 	constructor(private imageApiService: ImageApiService) {
 		this.images = new Subject<AppImage[]>();
 		this.imageApiService.images().subscribe((images) => {
-			this.app_images;
-			this.images.next(images);
+			this.app_images = images;
+			this.app_images.forEach((image) => {
+				for (let key of Object.keys(image.image_sizes)) {
+					image.image_sizes[key].uri = environment.imageApiUri + image.image_sizes[key].uri;
+				}
+			});
+			this.images.next(this.app_images);
 		});
 	}
 

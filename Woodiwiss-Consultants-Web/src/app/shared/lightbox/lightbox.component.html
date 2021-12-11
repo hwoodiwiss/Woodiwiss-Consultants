@@ -30,8 +30,12 @@
 					slideIndex == i ? 'display: block;' : 'display: none;'
 				"
 			>
-				<img [src]="image[0]" class="image-slide" [alt]="image[1]" />
-				<h3>{{ image[2] }}</h3>
+				<img
+					[src]="image.image_sizes['thumbnail'].uri"
+					class="image-slide"
+					[alt]="image.description"
+				/>
+				<h3>{{ image.description }}</h3>
 			</div>
 
 			<a
@@ -58,10 +62,10 @@
 				(keydown.enter)="moveSlide(i)"
 			>
 				<img
-					[src]="image[0]"
+					[src]="image.image_sizes['thumbnail'].uri"
 					class="modal-preview hover-shadow"
 					(click)="moveSlide(i)"
-					[alt]="image[1]"
+					[alt]="image.description"
 					[class.active]="i == slideIndex"
 					[tabindex]="1 + i"
 				/>
