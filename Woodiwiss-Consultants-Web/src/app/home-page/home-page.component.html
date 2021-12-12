@@ -1,7 +1,7 @@
 <div class="grid-base wide">
 	<div class="row">
 		<wcw-image-carousel
-			[images]="imageService.images | async"
+			[images]="imageService.getImages()"
 		></wcw-image-carousel>
 	</div>
 
