@@ -1,0 +1,10 @@
+<div class="form-container">
+	<form
+		*ngIf="!loading && !success"
+		[formGroup]="formGroup"
+		(ngSubmit)="onSubmit($event)"
+	>
+		<input type="file" name="image" (change)="onFileChanged($event)" />
+		<button class="success" type="submit">Submit</button>
+	</form>
+</div>
