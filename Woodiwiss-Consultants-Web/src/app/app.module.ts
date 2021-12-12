@@ -13,7 +13,7 @@ import { ServicesPageModule } from './services-page/services-page.module';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CredentialsInterceptor } from './services/CredentialsInterceptor';
 import { LoginPageModule } from './login-page/login-page.module';
-import { GalleryPageModule } from './image-hosting/image-hosting.module';
+import { ImageHostingPageModule } from './image-hosting/image-hosting.module';
 
 @NgModule({
 	declarations: [AppComponent],
@@ -28,7 +28,7 @@ import { GalleryPageModule } from './image-hosting/image-hosting.module';
 		NotFoundPageModule,
 		ServicesPageModule,
 		LoginPageModule,
-		GalleryPageModule,
+		ImageHostingPageModule,
 	],
 	providers: [{ provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true }],
 
