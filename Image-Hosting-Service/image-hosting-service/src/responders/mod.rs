@@ -19,14 +19,14 @@ impl<'r> Responder<'r, 'static> for OptionsResponse {
                     .map(|x| String::from(x.trim()))
                     .collect()
             });
-        requested_headers.push(String::from("Access-Control-Allowed-Origin"));
+        requested_headers.push(String::from("Access-Control-Allow-Origin"));
         Response::build()
             .header(Header::new(
-                "Access-Control-Allowed-Methods",
+                "Access-Control-Allow-Methods",
                 self.allowed_methods.join(", "),
             ))
             .header(Header::new(
-                "Access-Control-Allowed-Headers",
+                "Access-Control-Allow-Headers",
                 requested_headers.join(", "),
             ))
             .ok()
