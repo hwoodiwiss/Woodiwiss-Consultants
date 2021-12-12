@@ -1,3 +1,4 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SharedTestingModule } from '../shared/shared-testing.module';
 
@@ -10,7 +11,7 @@ describe('GalleryPageComponent', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
 			declarations: [GalleryPageComponent],
-			imports: [SharedTestingModule],
+			imports: [SharedTestingModule, HttpClientTestingModule],
 		}).compileComponents();
 	});
 
