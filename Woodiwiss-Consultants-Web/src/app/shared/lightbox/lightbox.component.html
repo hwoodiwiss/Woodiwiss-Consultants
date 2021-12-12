@@ -36,6 +36,9 @@
 					[alt]="image.description"
 				/>
 				<h3>{{ image.description }}</h3>
+				<a [href]="image.image_sizes['original'].uri" download
+					>Download Image</a
+				>
 			</div>
 
 			<a
