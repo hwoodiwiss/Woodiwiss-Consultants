@@ -14,6 +14,7 @@ table! {
         ImageData -> Longtext,
         Description -> Char,
         Hidden -> Bool,
+        FileType -> Varchar,
     }
 }
 
