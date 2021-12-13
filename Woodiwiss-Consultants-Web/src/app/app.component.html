@@ -8,14 +8,20 @@
 				<div class="logoWrapper">
 					<img
 						alt="Woodiwiss Consultants Logo"
-						src="/assets/images/Logo.png"
+						[src]="
+							imageBase +
+							'/image/a108a8c6-61de-49e3-940b-8d19611967e0/original'
+						"
 					/>
 				</div>
 				<div class="buttonWrapper">
 					<img
 						alt="Woodiwiss Consultants Logo"
 						class="button-logo"
-						src="/assets/images/Logo.png"
+						[src]="
+							imageBase +
+							'/image/a108a8c6-61de-49e3-940b-8d19611967e0/original'
+						"
 					/>
 					<span class="nav-item">
 						<a [routerLink]="['/']" (click)="active = false"
