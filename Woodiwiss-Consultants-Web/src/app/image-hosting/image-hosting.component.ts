@@ -7,7 +7,7 @@ import { ImageService } from '../services/image.service';
 	templateUrl: './image-hosting.component.html',
 	styleUrls: ['./image-hosting.component.scss'],
 })
-export class GalleryPageComponent implements OnInit {
+export class ImageHostingPage implements OnInit {
 	constructor(public imageService: ImageService) {}
 
 	ngOnInit(): void {}
