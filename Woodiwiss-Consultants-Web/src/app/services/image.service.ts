@@ -27,7 +27,12 @@ export class ImageService {
 	}
 
 	async addImage(file: File): Promise<AppImage> {
-		const image = await this.imageApiService.add_image(new Uint8Array(await file.arrayBuffer())).toPromise();
+		const arrayBuffer = await file.arrayBuffer();
+		const image = await this.imageApiService.add_image(arrayBuffer).toPromise();
+		for (let key of Object.keys(image.image_sizes)) {
+			image.image_sizes[key].uri = environment.imageApiUri + image.image_sizes[key].uri;
+		}
+		this.images.push(image);
 		return image;
 	}
 }
