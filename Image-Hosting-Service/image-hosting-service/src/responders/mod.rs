@@ -1,8 +1,4 @@
-use rocket::{
-    http::{self, Header},
-    response::Responder,
-    Response,
-};
+use rocket::{http::Header, response::Responder, Response};
 
 pub struct OptionsResponse {
     pub allowed_methods: Vec<&'static str>,
