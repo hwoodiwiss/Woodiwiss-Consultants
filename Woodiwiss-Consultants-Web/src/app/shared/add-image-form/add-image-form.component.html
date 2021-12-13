@@ -31,10 +31,17 @@
 			<input type="file" name="image" (change)="onFileChanged($event)" />
 			<fa-icon [icon]="faCloudUpload"></fa-icon> Upload an Image
 		</label>
-		<button class="success" type="submit">Submit</button>
-		<button name="Clear" class="warn" type="button" (click)="resetForm()">
-			Clear
-		</button>
+		<div>
+			<button class="success" type="submit">Submit</button>
+			<button
+				name="Clear"
+				class="warn"
+				type="button"
+				(click)="resetForm()"
+			>
+				Clear
+			</button>
+		</div>
 	</form>
 	<div *ngIf="loading" class="loading-container">
 		<h2>Loading...</h2>
