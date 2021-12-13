@@ -1,11 +1,11 @@
 import { Component, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ReCaptchaV3Service } from 'ng-recaptcha';
-import { UsersApiService } from 'src/app/services/api/usersApi.service';
-import { NewUserFormModel } from 'src/app/services/api/UsersApiModels';
 import { ImageService } from 'src/app/services/image.service';
 import { FormBaseComponent } from '../form-base/form-base.component';
 import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons';
+
+const ALLOWED_FILE_TYPES = ['jpg', 'jpeg', 'png', 'bmp'];
 
 @Component({
 	selector: 'wcw-add-image-form',
@@ -21,10 +21,14 @@ export class AddImageFormComponent extends FormBaseComponent {
 
 	constructor(recaptcha: ReCaptchaV3Service, private imageService: ImageService) {
 		super(recaptcha, 'addImageForm', true);
+		this.customErrorMessages.set('RequireImageFile', `Provided file must be a valid image of type: ${ALLOWED_FILE_TYPES.join(', ')}`);
 
-		this.formGroup = new FormGroup({
-			ImageFile: new FormControl(undefined, [Validators.required]),
-		});
+		this.formGroup = new FormGroup(
+			{
+				ImageFile: new FormControl(undefined, [Validators.required]),
+			},
+			this.RequireImageFile('ImageFile')
+		);
 	}
 
 	onFileChanged(event) {
@@ -49,6 +53,20 @@ export class AddImageFormComponent extends FormBaseComponent {
 		this.invalidImage = true;
 	}
 
+	protected RequireImageFile(...fields: string[]): ValidatorFn {
+		return (formGroup: FormGroup) => {
+			const controlVals: any[] = [];
+
+			for (const field of fields) {
+				controlVals.push(formGroup.controls[field].value);
+			}
+
+			return controlVals.every((val) => val instanceof File && ALLOWED_FILE_TYPES.some((type) => val.name.toLowerCase().endsWith(type)))
+				? null
+				: { RequireImageFile: true };
+		};
+	}
+
 	public async submitData(token: string) {
 		const file = this.formGroup.controls['ImageFile'].value;
 		try {
@@ -66,5 +84,10 @@ export class AddImageFormComponent extends FormBaseComponent {
 	public onSubmitSuccess(data: any) {
 		this.loading = false;
 		this.error = false;
+	}
+	public resetForm(): void {
+		this.imgSource = null;
+		this.invalidImage = false;
+		super.resetForm();
 	}
 }

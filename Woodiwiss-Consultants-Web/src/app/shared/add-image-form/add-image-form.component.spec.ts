@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ReCaptchaV3Service } from 'ng-recaptcha';
 import { of } from 'rxjs';
 import { ImageService } from 'src/app/services/image.service';
 import { User } from 'src/app/services/user.model';
+import { FormBaseComponent } from '../form-base/form-base.component';
 
 import { AddImageFormComponent } from './add-image-form.component';
 
@@ -20,7 +22,7 @@ describe('AddImageFormComponent', () => {
 		jest.resetAllMocks();
 		await TestBed.configureTestingModule({
 			declarations: [AddImageFormComponent],
-			imports: [CommonModule, FormsModule, ReactiveFormsModule],
+			imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule],
 			providers: [
 				{
 					provide: ReCaptchaV3Service,
@@ -64,7 +66,7 @@ describe('AddImageFormComponent', () => {
 	});
 
 	it('onFileChanged should set ImageFile value if there are files', () => {
-		const EXPECTED_VAL = 'a file, but actually not';
+		const EXPECTED_VAL = new File(['test'], 'test_file.png');
 		const event = {
 			target: {
 				files: [EXPECTED_VAL],
@@ -74,7 +76,26 @@ describe('AddImageFormComponent', () => {
 		expect(component.formGroup.get('ImageFile').value).toBe(EXPECTED_VAL);
 	});
 
-	it('submitData should set file', () => {
+	it('setImageValue should set imgSource value to the dataUrl of the file', () => {
+		const EXPECTED_VAL = 'test';
+		const event = {
+			target: {
+				result: EXPECTED_VAL,
+			},
+		};
+		component.setImageValue(event as any);
+		expect(component.imgSource).toBe(EXPECTED_VAL);
+	});
+
+	it('onImageLoadFailed should set imgSource value to null and set invalidImage', () => {
+		component.imgSource = 'test_mc_data_boi';
+		component.invalidImage = false;
+		component.onImageLoadFailed();
+		expect(component.imgSource).toBe(null);
+		expect(component.invalidImage).toBe(true);
+	});
+
+	it('submitData should pass the file', () => {
 		const testToken = 'token';
 
 		const expectFile = new File([], 'abc.png', {});
@@ -102,5 +123,19 @@ describe('AddImageFormComponent', () => {
 		component.error = false;
 		component.onSubmitError('');
 		expect(component.error).toBe(true);
+	});
+
+	it('resetForm should set imgSource value to null and set invalidImage to false', () => {
+		component.imgSource = 'test_mc_data_boi';
+		component.invalidImage = true;
+		component.resetForm();
+		expect(component.imgSource).toBe(null);
+		expect(component.invalidImage).toBe(false);
+	});
+
+	it('resetForm should call parent resetForm', () => {
+		let baseResetSpy = jest.spyOn(FormBaseComponent.prototype, 'resetForm');
+		component.resetForm();
+		expect(baseResetSpy).toBeCalled();
 	});
 });

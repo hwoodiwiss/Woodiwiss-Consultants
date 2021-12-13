@@ -1,9 +1,17 @@
 <div class="form-container">
 	<div *ngIf="error" class="submit-errors">
-		<p>An Unexpected Error Occurred. Please try again later.</p>
+		<p>
+			The AI have failed us. We could not generate a description, and so
+			will not store your image.
+		</p>
 	</div>
 	<div *ngIf="invalidImage" class="submit-errors">
-		<p>Provided image file was invalid</p>
+		<p>Provided file was not a valid image</p>
+	</div>
+	<div *ngIf="showErrorsForGroup()" class="form-errors">
+		<p *ngFor="let error of getGroupValidationErrors()">
+			{{ error }}
+		</p>
 	</div>
 	<div *ngIf="imgSource !== null">
 		<h3>Image Preview</h3>
@@ -24,6 +32,9 @@
 			<fa-icon [icon]="faCloudUpload"></fa-icon> Upload an Image
 		</label>
 		<button class="success" type="submit">Submit</button>
+		<button name="Clear" class="warn" type="button" (click)="resetForm()">
+			Clear
+		</button>
 	</form>
 	<div *ngIf="loading" class="loading-container">
 		<h2>Loading...</h2>
