@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 import { AccountService } from './services/account.service';
 
 @Component({
@@ -13,6 +14,8 @@ export class AppComponent implements OnInit {
 
 	active = false;
 	showAdmin = false;
+
+	imageBase = environment.imageApiUri;
 
 	constructor(public router: Router, public accountService: AccountService) {}
 
