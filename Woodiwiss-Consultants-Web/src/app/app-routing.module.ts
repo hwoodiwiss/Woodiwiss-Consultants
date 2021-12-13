@@ -1,13 +1,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { AboutPageComponent } from './about-page/about-page.component';
 import { AdminGuardService } from './services/admin-guard.service';
 import { AdminPageComponent } from './admin-page/admin-page.component';
 import { ContactPageComponent } from './contact-page/contact-page.component';
 import { ImageHostingPage } from './image-hosting/image-hosting.component';
 import { HomePageComponent } from './home-page/home-page.component';
 import { NotFoundPageComponent } from './not-found-page/not-found-page.component';
-import { ServicesPageComponent } from './services-page/services-page.component';
 import { LoginPageComponent } from './login-page/login-page.component';
 import { UsersComponent } from './admin-page/users/users.component';
 import { AddUserComponent } from './admin-page/add-user/add-user.component';
@@ -19,15 +17,7 @@ const routes: Routes = [
 		component: HomePageComponent,
 	},
 	{
-		path: 'About',
-		component: AboutPageComponent,
-	},
-	{
-		path: 'Services',
-		component: ServicesPageComponent,
-	},
-	{
-		path: 'Image Hosting',
+		path: 'Image Gallery',
 		component: ImageHostingPage,
 	},
 	{
