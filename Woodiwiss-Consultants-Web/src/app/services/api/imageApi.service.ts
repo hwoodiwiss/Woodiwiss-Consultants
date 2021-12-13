@@ -13,7 +13,7 @@ export class ImageApiService {
 		return this.httpClient.get<AppImage[]>(`${this.config.ImageApiUri}/images`, { withCredentials: false });
 	}
 
-	public add_image(binImage: Uint8Array) {
+	public add_image(binImage: ArrayBuffer) {
 		return this.httpClient.post<AppImage>(`${this.config.ImageApiUri}/image`, binImage);
 	}
 }
