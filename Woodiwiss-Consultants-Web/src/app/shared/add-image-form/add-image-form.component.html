@@ -13,7 +13,7 @@
 			{{ error }}
 		</p>
 	</div>
-	<div *ngIf="imgSource !== null">
+	<div *ngIf="imgSource !== null && !success">
 		<h3>Image Preview</h3>
 		<img
 			id="preview-image"
@@ -45,5 +45,16 @@
 	</form>
 	<div *ngIf="loading" class="loading-container">
 		<h2>Loading...</h2>
+	</div>
+	<div *ngIf="success" class="success-container">
+		<h4>Form Submitted Successfully!</h4>
+		<button
+			name="Reset Form"
+			class="warn"
+			type="button"
+			(click)="resetForm()"
+		>
+			Start Again
+		</button>
 	</div>
 </div>
