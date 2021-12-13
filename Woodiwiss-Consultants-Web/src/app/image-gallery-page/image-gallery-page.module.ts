@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ImageHostingPage } from './image-hosting.component';
+import { ImageGalleryPage } from './image-gallery-page.component';
 import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
-	declarations: [ImageHostingPage],
+	declarations: [ImageGalleryPage],
 	imports: [CommonModule, SharedModule],
 })
-export class ImageHostingPageModule {}
+export class ImageGalleryPageModule {}

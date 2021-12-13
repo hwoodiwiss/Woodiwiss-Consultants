@@ -2,21 +2,21 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SharedTestingModule } from '../shared/shared-testing.module';
 
-import { ImageHostingPage } from './image-hosting.component';
+import { ImageGalleryPage } from './image-gallery-page.component';
 
 describe('GalleryPageComponent', () => {
-	let component: ImageHostingPage;
-	let fixture: ComponentFixture<ImageHostingPage>;
+	let component: ImageGalleryPage;
+	let fixture: ComponentFixture<ImageGalleryPage>;
 
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
-			declarations: [ImageHostingPage],
+			declarations: [ImageGalleryPage],
 			imports: [SharedTestingModule, HttpClientTestingModule],
 		}).compileComponents();
 	});
 
 	beforeEach(() => {
-		fixture = TestBed.createComponent(ImageHostingPage);
+		fixture = TestBed.createComponent(ImageGalleryPage);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	});

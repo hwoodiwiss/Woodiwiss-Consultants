@@ -11,7 +11,7 @@ import { NotFoundModule as NotFoundPageModule } from './not-found-page/not-found
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CredentialsInterceptor } from './services/CredentialsInterceptor';
 import { LoginPageModule } from './login-page/login-page.module';
-import { ImageHostingPageModule } from './image-hosting/image-hosting.module';
+import { ImageGalleryPageModule } from './image-gallery-page/image-gallery-page.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
@@ -25,7 +25,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 		HomePageModule,
 		NotFoundPageModule,
 		LoginPageModule,
-		ImageHostingPageModule,
+		ImageGalleryPageModule,
 		FontAwesomeModule,
 	],
 	providers: [{ provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true }],
