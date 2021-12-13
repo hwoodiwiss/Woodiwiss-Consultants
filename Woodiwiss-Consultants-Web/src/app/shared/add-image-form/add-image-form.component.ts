@@ -12,8 +12,6 @@ import { FormBaseComponent } from '../form-base/form-base.component';
 	styleUrls: ['./add-image-form.component.scss'],
 })
 export class AddImageFormComponent extends FormBaseComponent {
-	@Output() onUserAdded = new EventEmitter();
-
 	constructor(recaptcha: ReCaptchaV3Service, private imageService: ImageService) {
 		super(recaptcha, 'addImageForm', true);
 
@@ -31,12 +29,14 @@ export class AddImageFormComponent extends FormBaseComponent {
 		}
 	}
 
-	public submitData(token: string) {
+	public async submitData(token: string) {
 		const file = this.formGroup.controls['ImageFile'].value;
-		this.imageService.addImage(file).then(
-			() => this.onSubmitSuccess.bind(this),
-			() => this.onSubmitError.bind(this)
-		);
+		try {
+			const imageData = await this.imageService.addImage(file);
+			this.onSubmitSuccess(imageData);
+		} catch (e) {
+			this.onSubmitError(e);
+		}
 	}
 	public onSubmitError(error: any) {
 		console.warn(error);
@@ -46,6 +46,5 @@ export class AddImageFormComponent extends FormBaseComponent {
 	public onSubmitSuccess(data: any) {
 		this.loading = false;
 		this.error = false;
-		this.onUserAdded.emit(null);
 	}
 }
