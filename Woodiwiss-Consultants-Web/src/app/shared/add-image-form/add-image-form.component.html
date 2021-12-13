@@ -1,4 +1,7 @@
 <div class="form-container">
+	<div *ngIf="error" class="submit-errors">
+		<p>An Unexpected Error Occurred. Please try again later.</p>
+	</div>
 	<form
 		*ngIf="!loading && !success"
 		[formGroup]="formGroup"
