@@ -2,6 +2,11 @@ use acs_image_analysis::ImageAnalysisError;
 
 use crate::data::config::AppConfiguration;
 
+pub enum ImageAnalysisServiceError {
+    FailedToDescribeImage,
+    ImageAnalysisError(ImageAnalysisError),
+}
+
 pub struct ImageAnalysisService(acs_image_analysis::AzureImageAnalysisClient);
 
 impl ImageAnalysisService {
@@ -11,16 +16,26 @@ impl ImageAnalysisService {
         ))
     }
 
-    pub async fn get_description(&self, image_bytes: &[u8]) -> Result<String, ImageAnalysisError> {
-        let image_analysis = self.0.analyse(Vec::from(image_bytes)).await?;
+    pub async fn get_description(
+        &self,
+        image_bytes: &[u8],
+    ) -> Result<String, ImageAnalysisServiceError> {
+        let image_analysis = self
+            .0
+            .analyse(Vec::from(image_bytes))
+            .await
+            .map_err(|err| ImageAnalysisServiceError::ImageAnalysisError(err))?;
         let mut image_captions = image_analysis.description.captions.clone();
         image_captions.sort_by(|a, b| a.confidence.partial_cmp(&b.confidence).unwrap());
         let descriptions = image_captions
             .iter()
             .map(|caption| caption.text.clone())
             .collect::<Vec<_>>();
-        let err_msg = String::from("Image analysis failed for an unknown reason");
-        Ok(descriptions.first().unwrap_or(&err_msg).clone())
+
+        match descriptions.first() {
+            Some(desc) => Ok(desc.clone()),
+            None => Err(ImageAnalysisServiceError::FailedToDescribeImage),
+        }
     }
 }
 
