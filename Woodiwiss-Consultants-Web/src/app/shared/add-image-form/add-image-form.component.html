@@ -2,12 +2,30 @@
 	<div *ngIf="error" class="submit-errors">
 		<p>An Unexpected Error Occurred. Please try again later.</p>
 	</div>
+	<div *ngIf="invalidImage" class="submit-errors">
+		<p>Provided image file was invalid</p>
+	</div>
+	<div *ngIf="imgSource !== null">
+		<h3>Image Preview</h3>
+		<img
+			id="preview-image"
+			aria-details="Image Preview"
+			[src]="imgSource"
+			(error)="onImageLoadFailed()"
+		/>
+	</div>
 	<form
 		*ngIf="!loading && !success"
 		[formGroup]="formGroup"
 		(ngSubmit)="onSubmit($event)"
 	>
-		<input type="file" name="image" (change)="onFileChanged($event)" />
+		<label class="upload">
+			<input type="file" name="image" (change)="onFileChanged($event)" />
+			<fa-icon [icon]="faCloudUpload"></fa-icon> Upload an Image
+		</label>
 		<button class="success" type="submit">Submit</button>
 	</form>
+	<div *ngIf="loading" class="loading-container">
+		<h2>Loading...</h2>
+	</div>
 </div>

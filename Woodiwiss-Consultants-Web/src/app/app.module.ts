@@ -14,6 +14,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CredentialsInterceptor } from './services/CredentialsInterceptor';
 import { LoginPageModule } from './login-page/login-page.module';
 import { ImageHostingPageModule } from './image-hosting/image-hosting.module';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
 	declarations: [AppComponent],
@@ -29,6 +30,7 @@ import { ImageHostingPageModule } from './image-hosting/image-hosting.module';
 		ServicesPageModule,
 		LoginPageModule,
 		ImageHostingPageModule,
+  FontAwesomeModule,
 	],
 	providers: [{ provide: HTTP_INTERCEPTORS, useClass: CredentialsInterceptor, multi: true }],
 
