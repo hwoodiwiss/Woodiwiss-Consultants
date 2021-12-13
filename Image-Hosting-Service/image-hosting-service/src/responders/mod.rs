@@ -32,24 +32,3 @@ impl<'r> Responder<'r, 'static> for OptionsResponse {
             .ok()
     }
 }
-
-pub struct ApiResponse<T>(pub Result<T, http::Status>);
-
-impl<T> Into<Result<T, http::Status>> for ApiResponse<T> {
-    fn into(self) -> Result<T, http::Status> {
-        self.0
-    }
-}
-
-impl<T> Into<ApiResponse<T>> for Result<T, http::Status> {
-    fn into(self) -> ApiResponse<T> {
-        ApiResponse(self)
-    }
-}
-
-impl<'r, T: Responder<'r, 'static>> Responder<'r, 'static> for ApiResponse<T> {
-    fn respond_to(self, request: &'r rocket::Request<'_>) -> rocket::response::Result<'static> {
-        let responder = self.0?;
-        responder.respond_to(request)
-    }
-}
