@@ -84,6 +84,7 @@ export class AddImageFormComponent extends FormBaseComponent {
 	public onSubmitSuccess(data: any) {
 		this.loading = false;
 		this.error = false;
+		this.success = true;
 	}
 	public resetForm(): void {
 		this.imgSource = null;
