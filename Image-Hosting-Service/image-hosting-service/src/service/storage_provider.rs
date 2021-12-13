@@ -49,12 +49,14 @@ impl StorageProvider {
         id: String,
         size: String,
         image: &image::DynamicImage,
+        file_type: image::ImageFormat,
     ) -> Result<ImageSizeInfo, StorageProviderError> {
+        let extension_str = file_type.extensions_str()[0];
         let image_folder = format!("{}/{}", self.storage_base, id);
         fs::create_dir_all(&image_folder).map_err(|err| map_io_error_to_storage_error(&err))?;
-        let image_uri = format!("{}/{}.jpg", image_folder, size);
+        let image_uri = format!("{}/{}.{}", image_folder, size, extension_str);
         image
-            .save_with_format(image_uri, image::ImageFormat::Jpeg)
+            .save_with_format(image_uri, file_type)
             .map_err(|err| map_image_error_to_storage_error(&err))?;
         let image_dimensions = image.dimensions();
         Ok(ImageSizeInfo {

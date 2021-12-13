@@ -21,4 +21,5 @@ pub struct ImageDbModel {
     pub image_data: String,
     pub description: String,
     pub hidden: bool,
+    pub file_type: String,
 }

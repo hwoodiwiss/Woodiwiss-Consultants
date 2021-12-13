@@ -108,6 +108,7 @@ async fn post_image_internal(
     request_image: RequestImage,
     hidden: Option<bool>,
 ) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
+    println!("In controller");
     let hidden = hidden.unwrap_or(false);
     let image_analysis = analysis_service
         .get_description(&request_image.bytes[..])
@@ -123,7 +124,12 @@ async fn post_image_internal(
     for (size, image) in &resized_images {
         image_sizes.insert(
             size.clone(),
-            match storage_provider.save_image(id.clone(), size.clone(), image) {
+            match storage_provider.save_image(
+                id.clone(),
+                size.clone(),
+                image,
+                request_image.image_format,
+            ) {
                 Ok(res) => res,
                 Err(_) => return status::Custom(Status::InternalServerError, Either::Right("")),
             },
@@ -135,6 +141,7 @@ async fn post_image_internal(
             id.clone(),
             String::from("original"),
             &request_image.as_image,
+            request_image.image_format,
         ) {
             Ok(res) => res,
             Err(_) => return status::Custom(Status::InternalServerError, Either::Right("")),
@@ -154,6 +161,7 @@ async fn post_image_internal(
         dsl::ImageData.eq(image_size_json),
         dsl::Description.eq(description.clone()),
         dsl::Hidden.eq(hidden),
+        dsl::FileType.eq(request_image.image_format.extensions_str()[0]),
     );
     match db_conn
         .run(move |conn| {
@@ -185,7 +193,7 @@ async fn get_image_internal(
 ) -> response::status::Custom<Option<NamedFile>> {
     let qry_id = id.clone();
     //Returns not found if not found in the database
-    let _ = match db_conn
+    let image_metadata = match db_conn
         .run(|conn| {
             dsl::Images
                 .filter(&dsl::Id.eq(qry_id))
@@ -197,7 +205,9 @@ async fn get_image_internal(
         Err(_) => return response::status::Custom(Status::NotFound, None),
     };
 
-    match NamedFile::open(format!("./images/{}/{}.jpg", id, size).as_str()).await {
+    match NamedFile::open(format!("./images/{}/{}.{}", id, size, image_metadata.file_type).as_str())
+        .await
+    {
         Ok(file) => response::status::Custom(Status::Ok, Some(file)),
         Err(_) => response::status::Custom(Status::NotFound, None),
     }
