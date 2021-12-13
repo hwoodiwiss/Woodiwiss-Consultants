@@ -1,11 +1,11 @@
-<h1 class="page-title">Gallery</h1>
+<h1 class="page-title">Image Hosting</h1>
 <div class="grid-base container no-fill">
-	<wcw-add-image-form></wcw-add-image-form>
 	<wcw-content-editor
 		class="row"
 		id="dfe7bb25-32a4-4076-a678-ae0eb813b2b7"
 		[useContainer]="false"
 	>
 	</wcw-content-editor>
+	<wcw-add-image-form class="row"></wcw-add-image-form>
 </div>
 <wcw-lightbox [images]="imageService.getImages()"> </wcw-lightbox>
