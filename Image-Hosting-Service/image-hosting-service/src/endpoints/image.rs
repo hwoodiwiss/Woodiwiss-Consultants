@@ -5,10 +5,13 @@ use acs_image_analysis::ImageAnalysisError;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::{
     fs::NamedFile,
-    http::{self, Status},
-    response,
-    serde::{self, json::Json},
-    State,
+    http::Status,
+    response::{self, status},
+    serde::{
+        self,
+        json::{self},
+    },
+    Either, State,
 };
 use uuid::Uuid;
 
@@ -19,9 +22,10 @@ use crate::{
     },
     database::{self, Images::dsl},
     guards::RequestImage,
-    responders::{ApiResponse, OptionsResponse},
+    responders::OptionsResponse,
     service::{
-        image_analysis::ImageAnalysisService, resize::ResizeService,
+        image_analysis::{ImageAnalysisService, ImageAnalysisServiceError},
+        resize::ResizeService,
         storage_provider::StorageProvider,
     },
     ImageDb,
@@ -33,13 +37,37 @@ pub fn stage() -> rocket::fairing::AdHoc {
     })
 }
 
-fn map_analysis_error_to_status(err: &ImageAnalysisError) -> http::Status {
+fn map_analysis_service_error_to_status(
+    err: &ImageAnalysisServiceError,
+) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
     match err {
-        ImageAnalysisError::InvalidImageFormat => http::Status::BadRequest,
-        ImageAnalysisError::UnexpectedResponseCode(_) => http::Status::InternalServerError,
-        ImageAnalysisError::UnexpectedResponseFormat(_) => http::Status::InternalServerError,
-        ImageAnalysisError::HttpError(_) => http::Status::InternalServerError,
-        ImageAnalysisError::ServiceError => http::Status::InternalServerError,
+        ImageAnalysisServiceError::FailedToDescribeImage => status::Custom(
+            Status::BadRequest,
+            Either::Right("The provider could not describe the provided image"),
+        ),
+        ImageAnalysisServiceError::ImageAnalysisError(err) => map_analysis_error_to_status(err),
+    }
+}
+
+fn map_analysis_error_to_status(
+    err: &ImageAnalysisError,
+) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
+    match err {
+        ImageAnalysisError::InvalidImageFormat => {
+            status::Custom(Status::BadRequest, Either::Right("Invalid image format"))
+        }
+        ImageAnalysisError::UnexpectedResponseCode(_) => {
+            status::Custom(Status::InternalServerError, Either::Right(""))
+        }
+        ImageAnalysisError::UnexpectedResponseFormat(_) => {
+            status::Custom(Status::InternalServerError, Either::Right(""))
+        }
+        ImageAnalysisError::HttpError(_) => {
+            status::Custom(Status::InternalServerError, Either::Right(""))
+        }
+        ImageAnalysisError::ServiceError => {
+            status::Custom(Status::InternalServerError, Either::Right(""))
+        }
     }
 }
 
@@ -59,7 +87,7 @@ async fn post_image(
     storage_provider: &State<StorageProvider>,
     request_image: RequestImage,
     hidden: Option<bool>,
-) -> ApiResponse<Json<ImageResponse>> {
+) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
     post_image_internal(
         db_conn,
         analysis_service,
@@ -79,7 +107,7 @@ async fn post_image_internal(
     storage_provider: &State<StorageProvider>,
     request_image: RequestImage,
     hidden: Option<bool>,
-) -> ApiResponse<Json<ImageResponse>> {
+) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
     let hidden = hidden.unwrap_or(false);
     let image_analysis = analysis_service
         .get_description(&request_image.bytes[..])
@@ -87,7 +115,7 @@ async fn post_image_internal(
 
     let description = match image_analysis {
         Ok(description) => description,
-        Err(err) => return ApiResponse(Err(map_analysis_error_to_status(&err))),
+        Err(err) => return map_analysis_service_error_to_status(&err),
     };
     let id = Uuid::new_v4().to_hyphenated_ref().to_string();
     let mut image_sizes = HashMap::<String, ImageSizeInfo>::new();
@@ -97,7 +125,7 @@ async fn post_image_internal(
             size.clone(),
             match storage_provider.save_image(id.clone(), size.clone(), image) {
                 Ok(res) => res,
-                Err(_) => return ApiResponse(Err(http::Status::InternalServerError)),
+                Err(_) => return status::Custom(Status::InternalServerError, Either::Right("")),
             },
         );
     }
@@ -109,7 +137,7 @@ async fn post_image_internal(
             &request_image.as_image,
         ) {
             Ok(res) => res,
-            Err(_) => return ApiResponse(Err(http::Status::InternalServerError)),
+            Err(_) => return status::Custom(Status::InternalServerError, Either::Right("")),
         },
     );
     let response = ImageResponse {
@@ -119,7 +147,7 @@ async fn post_image_internal(
     };
     let image_size_json = match serde::json::serde_json::to_string(&image_sizes.clone()) {
         Ok(res) => res,
-        Err(_) => return ApiResponse(Err(http::Status::InternalServerError)),
+        Err(_) => return status::Custom(Status::InternalServerError, Either::Right("")),
     };
     let image_row = (
         dsl::Id.eq(id),
@@ -135,8 +163,8 @@ async fn post_image_internal(
         })
         .await
     {
-        Ok(_) => ApiResponse(Ok(Json(response))),
-        Err(_) => ApiResponse(Err(http::Status::InternalServerError)),
+        Ok(_) => response::status::Custom(Status::Ok, Either::Left(json::Json(response))),
+        Err(_) => status::Custom(Status::InternalServerError, Either::Right("")),
     }
 }
 
