@@ -5,7 +5,6 @@ import { AppImage } from 'src/app/app-images';
 	selector: 'wcw-lightbox',
 	templateUrl: './lightbox.component.html',
 	styleUrls: ['./lightbox.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LightboxComponent {
 	@Input() images: AppImage[];
