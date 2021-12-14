@@ -24,8 +24,8 @@ use crate::{
     guards::RequestImage,
     responders::OptionsResponse,
     service::{
-        image_analysis::ImageAnalysisServiceError, resize::ResizeService,
-        storage_provider::StorageProvider, ImageAnalysisService,
+        image_analysis::ImageAnalysisServiceError, ImageAnalysisService, ResizeService,
+        StorageProvider,
     },
     ImageDb,
 };
@@ -82,16 +82,16 @@ async fn options() -> OptionsResponse {
 async fn post_image(
     db_conn: ImageDb,
     analysis_service: &State<Box<dyn ImageAnalysisService>>,
-    resize_service: &State<ResizeService>,
-    storage_provider: &State<StorageProvider>,
+    resize_service: &State<Box<dyn ResizeService>>,
+    storage_provider: &State<Box<dyn StorageProvider>>,
     request_image: RequestImage,
     hidden: Option<bool>,
 ) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
     post_image_internal(
         db_conn,
-        analysis_service,
-        resize_service,
-        storage_provider,
+        analysis_service.inner(),
+        resize_service.inner(),
+        storage_provider.inner(),
         request_image,
         hidden,
     )
@@ -101,9 +101,9 @@ async fn post_image(
 #[inline]
 async fn post_image_internal(
     db_conn: ImageDb,
-    analysis_service: &State<Box<dyn ImageAnalysisService>>,
-    resize_service: &State<ResizeService>,
-    storage_provider: &State<StorageProvider>,
+    analysis_service: &Box<dyn ImageAnalysisService>,
+    resize_service: &Box<dyn ResizeService>,
+    storage_provider: &Box<dyn StorageProvider>,
     request_image: RequestImage,
     hidden: Option<bool>,
 ) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {

@@ -4,11 +4,13 @@ use image::DynamicImage;
 
 use crate::data::config::{AppConfiguration, ImageSizeConfig};
 
-pub struct ResizeService {
+use super::ResizeService;
+
+pub struct DynamicImageResizeService {
     image_sizes: HashMap<String, ImageSizeConfig>,
 }
 
-impl ResizeService {
+impl DynamicImageResizeService {
     pub fn new(image_sizes: HashMap<String, ImageSizeConfig>) -> Self {
         Self { image_sizes }
     }
@@ -20,8 +22,11 @@ impl ResizeService {
             image::imageops::Triangle,
         )
     }
+}
 
-    pub async fn resize(&self, image: &DynamicImage) -> HashMap<String, DynamicImage> {
+#[async_trait]
+impl ResizeService for DynamicImageResizeService {
+    async fn resize(&self, image: &DynamicImage) -> HashMap<String, DynamicImage> {
         let mut out_map = HashMap::new();
         for (name, config) in &self.image_sizes {
             out_map.insert(name.clone(), Self::resize_image(&image, config));
@@ -41,6 +46,7 @@ pub fn stage() -> rocket::fairing::AdHoc {
 
             config.image_sizes.clone()
         };
-        rocket.manage(ResizeService::new(image_sizes))
+        rocket
+            .manage(Box::new(DynamicImageResizeService::new(image_sizes)) as Box<dyn ResizeService>)
     })
 }
