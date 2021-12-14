@@ -15,5 +15,5 @@ pub fn options() -> OptionsResponse {
 
 #[get("/")]
 pub fn index() -> String {
-    String::from("hello world")
+    String::from("")
 }
