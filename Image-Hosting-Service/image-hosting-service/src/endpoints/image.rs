@@ -34,6 +34,7 @@ pub fn stage() -> rocket::fairing::AdHoc {
     })
 }
 
+/// Map an analysis service error to an HTTP Status to return
 fn map_analysis_service_error_to_status(
     err: &ImageAnalysisServiceError,
 ) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
@@ -46,6 +47,7 @@ fn map_analysis_service_error_to_status(
     }
 }
 
+/// Map an analysis error to an HTTP Status to return
 fn map_analysis_error_to_status(
     err: &ImageAnalysisError,
 ) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
@@ -96,6 +98,8 @@ async fn post_image(
     .await
 }
 
+/// Analyses, resizes and stores an image provided by a user
+///
 #[inline]
 async fn post_image_internal(
     image_repository: &Box<dyn ImageDbRepository>,
@@ -168,6 +172,7 @@ async fn post_image_internal(
     }
 }
 
+/// A thin wrapper around the actual functionality to improve IDE support.
 #[get("/image/<id>/<size>")]
 async fn get_image(
     db_conn: ImageDb,
@@ -177,18 +182,28 @@ async fn get_image(
     get_image_internal(&(Box::new(ImageRepository::new(db_conn)) as _), &id, &size).await
 }
 
+/// Gets the image requested by a user or returns not found
+///
+/// # Ok
+/// Returns Ok if the file can be opened and sent
+///
+/// # Not Found
+/// Returns not found if DB query fails for any reason
+/// Or if reading the file fails for any reason
 #[inline]
 async fn get_image_internal(
     image_repository: &Box<dyn ImageDbRepository>,
     id: &String,
     size: &String,
 ) -> response::status::Custom<Option<NamedFile>> {
-    //Returns not found if not found in the database
+    // Get the image metadata from the image repository
     let image_metadata = match image_repository.get_by_id(id.clone()).await {
         Ok(item) => item,
         Err(_) => return response::status::Custom(Status::NotFound, None),
     };
 
+    // Construct a `NamedFile` responder from the expected image path,
+    // and return with Ok status if successful
     match NamedFile::open(format!("./images/{}/{}.{}", id, size, image_metadata.file_type).as_str())
         .await
     {
@@ -198,7 +213,7 @@ async fn get_image_internal(
 }
 
 #[cfg(test)]
-mod test {
+mod get_image_test {
     use std::{
         fs::{create_dir_all, remove_dir_all, File},
         future::Future,
