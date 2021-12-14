@@ -9,8 +9,6 @@ use crate::data::config::{AppConfiguration, CorsConfiguration};
 /// A dummy struct to use to provide CORS middleware
 pub struct CorsMiddleware;
 
-/// Fairing implementation for CorsMiddleware to allow
-/// it to be attached as middleware
 #[rocket::async_trait]
 impl Fairing for CorsMiddleware {
     fn info(&self) -> Info {
