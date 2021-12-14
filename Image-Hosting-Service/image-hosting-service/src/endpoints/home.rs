@@ -13,6 +13,9 @@ pub fn options() -> OptionsResponse {
     }
 }
 
+/// Returns Ok with no content
+///
+/// Intended mostly to be used as an 'up' detector
 #[get("/")]
 pub fn index() -> String {
     String::from("")
