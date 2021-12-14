@@ -24,9 +24,8 @@ use crate::{
     guards::RequestImage,
     responders::OptionsResponse,
     service::{
-        image_analysis::{ImageAnalysisService, ImageAnalysisServiceError},
-        resize::ResizeService,
-        storage_provider::StorageProvider,
+        image_analysis::ImageAnalysisServiceError, resize::ResizeService,
+        storage_provider::StorageProvider, ImageAnalysisService,
     },
     ImageDb,
 };
@@ -82,7 +81,7 @@ async fn options() -> OptionsResponse {
 #[post("/image?<hidden>", data = "<request_image>")]
 async fn post_image(
     db_conn: ImageDb,
-    analysis_service: &State<ImageAnalysisService>,
+    analysis_service: &State<Box<dyn ImageAnalysisService>>,
     resize_service: &State<ResizeService>,
     storage_provider: &State<StorageProvider>,
     request_image: RequestImage,
@@ -102,7 +101,7 @@ async fn post_image(
 #[inline]
 async fn post_image_internal(
     db_conn: ImageDb,
-    analysis_service: &State<ImageAnalysisService>,
+    analysis_service: &State<Box<dyn ImageAnalysisService>>,
     resize_service: &State<ResizeService>,
     storage_provider: &State<StorageProvider>,
     request_image: RequestImage,
