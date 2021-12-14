@@ -4,6 +4,8 @@ use image::{GenericImageView, ImageError};
 
 use crate::data::{config::AppConfiguration, image::ImageSizeInfo};
 
+use super::StorageProvider;
+
 pub enum StorageProviderError {
     ImageError,
     InsufficientPermissions,
@@ -35,16 +37,18 @@ fn map_io_error_to_storage_error(err: &io::Error) -> StorageProviderError {
     }
 }
 
-pub struct StorageProvider {
+pub struct LocalStorageProvider {
     storage_base: String,
 }
 
-impl StorageProvider {
+impl LocalStorageProvider {
     pub fn new(storage_base: String) -> Self {
         Self { storage_base }
     }
+}
 
-    pub fn save_image(
+impl StorageProvider for LocalStorageProvider {
+    fn save_image(
         &self,
         id: String,
         size: String,
@@ -82,6 +86,6 @@ pub fn stage() -> rocket::fairing::AdHoc {
             fs::create_dir_all(provider_base).expect("Failed to create image base path. Check you have permissions to read and write there.")
         }
 
-        rocket.manage(StorageProvider::new(storage_base))
+        rocket.manage(Box::new(LocalStorageProvider::new(storage_base)) as Box<dyn StorageProvider>)
     })
 }
