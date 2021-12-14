@@ -26,6 +26,14 @@ fn load_dynamic_image_for_bytes(
     ))
 }
 
+/// Stores image request data from request body
+///
+/// `bytes`: The raw byte representation of the image
+///
+/// `as_image`: The `image::DynamicImage` representation
+///  of the image for image processing
+///
+/// `image_format`: The `image::ImageFormat` of the image
 pub struct RequestImage {
     pub bytes: Vec<u8>,
     pub as_image: image::DynamicImage,
@@ -35,6 +43,17 @@ pub struct RequestImage {
 #[rocket::async_trait]
 impl<'r> FromData<'r> for RequestImage {
     type Error = &'r str;
+
+    /// Parses an image file from the users request body, limited to
+    /// a configurable number of bytes
+    ///  
+    /// ## Failures
+    /// - Fails if AppConfiguration cannot be found in the managed state
+    /// - Fails if data cannot be read from the body
+    /// - If after reading n bytes of body data where n is the configured
+    /// size limit, the body has not been completely read
+    /// - If the image is not in a format configured to be allowed
+    /// - If the image fails to parse into an `image::DynamicImage`
     async fn from_data(req: &'r Request<'_>, data: Data<'r>) -> Outcome<'r, Self> {
         let app_config = req
             .rocket()
