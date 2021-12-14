@@ -91,78 +91,101 @@ impl AzureImageAnalysisClientInternal {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
+    use super::AzureImageAnalysisClientInternal;
     use crate::{
         data::{
             ImageAnalysis, ImageAnalysisDescription, ImageAnalysisDescriptionCaption,
             ImageAnalysisMetadata,
         },
         error::{HttpError, ImageAnalysisError},
-        infra::{StatusCode, TestHttpClient, TestResponse},
+        infra::{MockHttpClient, MockHttpResponse, StatusCode},
     };
-
-    use super::AzureImageAnalysisClientInternal;
+    use mockall::predicate::*;
+    use mockall::*;
 
     #[tokio::test]
     async fn sets_api_key_header() {
         const EXPECTED_KEY: &str = "123456Secret";
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, headers| {
-            assert!(
-                headers.contains_key("Ocp-Apim-Subscription-Key"),
-                "No key header was found"
-            );
-            let actual_key = headers
-                .get("Ocp-Apim-Subscription-Key")
-                .expect("No API key header set");
-            assert_eq!(EXPECTED_KEY, actual_key);
-            Ok(Box::new(TestResponse::new(None, None)))
-        })));
+        let mut mock_client = MockHttpClient::default();
+        mock_client
+            .expect_post()
+            .with(
+                predicate::always(),
+                predicate::always(),
+                predicate::function(|headers: &HashMap<String, String>| {
+                    headers.contains_key("Ocp-Apim-Subscription-Key")
+                })
+                .and(predicate::function(|headers: &HashMap<String, String>| {
+                    let actual_key = headers
+                        .get("Ocp-Apim-Subscription-Key")
+                        .expect("No API key header set");
+                    EXPECTED_KEY == actual_key
+                })),
+            )
+            .returning(|_, _, _| Ok(Box::new(MockHttpResponse::default_assertions(true, true))));
 
         let analyser = AzureImageAnalysisClientInternal::new("test", EXPECTED_KEY);
-        let _ = analyser.analyse(&test_client, vec![0; 0]).await;
+        let _ = analyser.analyse(&mock_client, vec![0; 0]).await;
+        mock_client.checkpoint();
     }
 
     #[tokio::test]
     async fn sets_content_type_header() {
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, headers| {
-            assert!(
-                headers.contains_key("content-type"),
-                "No content-type header was found"
-            );
-            let content_type = headers.get("content-type").expect("No API key header set");
-            assert_eq!("application/octet-stream", content_type);
-            Ok(Box::new(TestResponse::new(None, None)))
-        })));
+        const EXPECTED_MIME: &str = "application/octet-stream";
+        let mut mock_client = MockHttpClient::default();
+        mock_client
+            .expect_post()
+            .with(
+                predicate::always(),
+                predicate::always(),
+                predicate::function(|headers: &HashMap<String, String>| {
+                    headers.contains_key("content-type")
+                })
+                .and(predicate::function(|headers: &HashMap<String, String>| {
+                    let content_type = headers.get("content-type").expect("No API key header set");
+                    EXPECTED_MIME == content_type
+                })),
+            )
+            .returning(|_, _, _| Ok(Box::new(MockHttpResponse::default_assertions(true, true))));
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
-        let _ = analyser.analyse(&test_client, vec![0; 0]).await;
+        let _ = analyser.analyse(&mock_client, vec![0; 0]).await;
+        mock_client.checkpoint();
     }
 
     #[tokio::test]
     async fn calls_correct_image_analysis_endpoint() {
         const EXPECTED_BASE_URI: &str = "https://a-cog-svc.cognitiveservices.azure.com";
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, uri, _data, _headers| {
-            let expected_endpoint = &format!("{}/vision/v3.0/analyze?", EXPECTED_BASE_URI);
-            assert!(
-                uri.starts_with(expected_endpoint),
-                "Uri did not start with the expected pattern. Uri: {}",
-                uri
-            );
 
-            Ok(Box::new(TestResponse::new(None, None)))
-        })));
+        let mut mock_client = MockHttpClient::default();
+        mock_client
+            .expect_post()
+            .with(
+                predicate::function(|uri: &str| {
+                    let expected_endpoint = &format!("{}/vision/v3.0/analyze?", EXPECTED_BASE_URI);
+                    uri.starts_with(expected_endpoint)
+                }),
+                predicate::always(),
+                predicate::always(),
+            )
+            .returning(|_, _, _| Ok(Box::new(MockHttpResponse::default_assertions(true, true))));
 
         let analyser = AzureImageAnalysisClientInternal::new(EXPECTED_BASE_URI, "test");
-        let _ = analyser.analyse(&test_client, vec![0; 0]).await;
+        let _ = analyser.analyse(&mock_client, vec![0; 0]).await;
+        mock_client.checkpoint();
     }
 
     #[tokio::test]
     async fn propagates_http_errors() {
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
-            Err(HttpError::Unknown)
-        })));
+        let mut mock_client = MockHttpClient::default();
+        mock_client
+            .expect_post()
+            .returning(|_, _, _| Err(HttpError::Unknown));
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
-        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        let result = analyser.analyse(&mock_client, vec![0; 0]).await;
         assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::HttpError(HttpError::Unknown), err)
@@ -171,15 +194,18 @@ mod tests {
     #[tokio::test]
     async fn safely_handles_internal_server_error() {
         const EXPECTED_STATUS: u16 = 500;
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
-            Ok(Box::new(TestResponse::new(
-                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
-                None,
-            )))
-        })));
+
+        let mut mock_client = MockHttpClient::default();
+        mock_client.expect_post().returning(|_, _, _| {
+            let mut mock_response = MockHttpResponse::default_assertions(false, true);
+            mock_response
+                .expect_status()
+                .returning(|| StatusCode(EXPECTED_STATUS));
+            Ok(Box::new(mock_response))
+        });
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
-        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        let result = analyser.analyse(&mock_client, vec![0; 0]).await;
         assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::ServiceError, err);
@@ -188,15 +214,18 @@ mod tests {
     #[tokio::test]
     async fn safely_handles_service_unavailable() {
         const EXPECTED_STATUS: u16 = 503;
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
-            Ok(Box::new(TestResponse::new(
-                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
-                None,
-            )))
-        })));
+
+        let mut mock_client = MockHttpClient::default();
+        mock_client.expect_post().returning(|_, _, _| {
+            let mut mock_response = MockHttpResponse::default_assertions(false, true);
+            mock_response
+                .expect_status()
+                .returning(|| StatusCode(EXPECTED_STATUS));
+            Ok(Box::new(mock_response))
+        });
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
-        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        let result = analyser.analyse(&mock_client, vec![0; 0]).await;
         assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::ServiceError, err);
@@ -205,15 +234,18 @@ mod tests {
     #[tokio::test]
     async fn safely_handles_unexpected_response_code() {
         const EXPECTED_STATUS: u16 = 420;
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
-            Ok(Box::new(TestResponse::new(
-                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
-                None,
-            )))
-        })));
+
+        let mut mock_client = MockHttpClient::default();
+        mock_client.expect_post().returning(|_, _, _| {
+            let mut mock_response = MockHttpResponse::default_assertions(false, true);
+            mock_response
+                .expect_status()
+                .returning(|| StatusCode(EXPECTED_STATUS));
+            Ok(Box::new(mock_response))
+        });
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
-        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        let result = analyser.analyse(&mock_client, vec![0; 0]).await;
         assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(
@@ -225,17 +257,21 @@ mod tests {
     #[tokio::test]
     async fn safely_handles_bad_request_image_format() {
         const EXPECTED_STATUS: u16 = 400;
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
-            Ok(Box::new(TestResponse::new(
-                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
-                Some(Box::new(|_response| {
-                    Ok(include_str!("../../test/invalid_image_format.json").to_owned())
-                })),
-            )))
-        })));
+
+        let mut mock_client = MockHttpClient::default();
+        mock_client.expect_post().returning(|_, _, _| {
+            let mut mock_response = MockHttpResponse::default();
+            mock_response
+                .expect_status()
+                .returning(|| StatusCode(EXPECTED_STATUS));
+            mock_response
+                .expect_text()
+                .returning(|| Ok(include_str!("../../test/invalid_image_format.json").to_owned()));
+            Ok(Box::new(mock_response))
+        });
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
-        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        let result = analyser.analyse(&mock_client, vec![0; 0]).await;
         assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(ImageAnalysisError::InvalidImageFormat, err);
@@ -245,15 +281,21 @@ mod tests {
     async fn safely_handles_bad_request_with_unexpected_body() {
         const EXPECTED_STATUS: u16 = 400;
         const UNEXPECTED_RESPONSE: &str = "\u{1f600}";
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
-            Ok(Box::new(TestResponse::new(
-                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
-                Some(Box::new(|_response| Ok(UNEXPECTED_RESPONSE.to_owned()))),
-            )))
-        })));
+
+        let mut mock_client = MockHttpClient::default();
+        mock_client.expect_post().returning(|_, _, _| {
+            let mut mock_response = MockHttpResponse::default();
+            mock_response
+                .expect_status()
+                .returning(|| StatusCode(EXPECTED_STATUS));
+            mock_response
+                .expect_text()
+                .returning(|| Ok(UNEXPECTED_RESPONSE.to_owned()));
+            Ok(Box::new(mock_response))
+        });
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
-        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        let result = analyser.analyse(&mock_client, vec![0; 0]).await;
         assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(
@@ -266,15 +308,21 @@ mod tests {
     async fn safely_handles_ok_with_unexpected_body() {
         const EXPECTED_STATUS: u16 = 200;
         const UNEXPECTED_RESPONSE: &str = "\u{1f600}";
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
-            Ok(Box::new(TestResponse::new(
-                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
-                Some(Box::new(|_response| Ok(UNEXPECTED_RESPONSE.to_owned()))),
-            )))
-        })));
+
+        let mut mock_client = MockHttpClient::default();
+        mock_client.expect_post().returning(|_, _, _| {
+            let mut mock_response = MockHttpResponse::default();
+            mock_response
+                .expect_status()
+                .returning(|| StatusCode(EXPECTED_STATUS));
+            mock_response
+                .expect_text()
+                .returning(|| Ok(UNEXPECTED_RESPONSE.to_owned()));
+            Ok(Box::new(mock_response))
+        });
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
-        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        let result = analyser.analyse(&mock_client, vec![0; 0]).await;
         assert!(result.is_err(), "Result was Ok, expected Error");
         let err = result.unwrap_err();
         assert_eq!(
@@ -303,17 +351,20 @@ mod tests {
             },
         };
 
-        let test_client = TestHttpClient::new(Some(Box::new(|_client, _uri, _data, _headers| {
-            Ok(Box::new(TestResponse::new(
-                Some(Box::new(|_response| StatusCode(EXPECTED_STATUS))),
-                Some(Box::new(|_response| {
-                    Ok(include_str!("../../test/image_description_response.json").to_owned())
-                })),
-            )))
-        })));
+        let mut mock_client = MockHttpClient::default();
+        mock_client.expect_post().returning(|_, _, _| {
+            let mut mock_response = MockHttpResponse::default();
+            mock_response
+                .expect_status()
+                .returning(|| StatusCode(EXPECTED_STATUS));
+            mock_response.expect_text().returning(|| {
+                Ok(include_str!("../../test/image_description_response.json").to_owned())
+            });
+            Ok(Box::new(mock_response))
+        });
 
         let analyser = AzureImageAnalysisClientInternal::new("test", "test");
-        let result = analyser.analyse(&test_client, vec![0; 0]).await;
+        let result = analyser.analyse(&mock_client, vec![0; 0]).await;
         assert!(result.is_ok(), "Result was Error, expected Ok");
         let image_analysis = result.unwrap();
         assert_eq!(expected_response, image_analysis);
