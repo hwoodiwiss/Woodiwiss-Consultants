@@ -196,3 +196,65 @@ async fn get_image_internal(
         Err(_) => response::status::Custom(Status::NotFound, None),
     }
 }
+
+#[cfg(test)]
+mod test {
+    use std::{
+        fs::{create_dir_all, File},
+        io::Write,
+    };
+
+    use mockall::predicate::*;
+    use mockall::*;
+    use rocket::http::Status;
+
+    use crate::{data::view_model::ImageDbModel, service::MockImageDbRepository};
+
+    use super::get_image_internal;
+
+    fn setup_test_file(id: String, size: String, file_type: String) {
+        create_dir_all(format!("./images/{}/", id).as_str()).expect(
+            "Failed to create image base path. Check you have permissions to read and write there.",
+        );
+        let mut file = File::create(format!("./images/{}/{}.{}", id, size, file_type).as_str())
+            .expect("Failed to create test file");
+        file.write_all(b"NOW I'VE GOT A TEST FILE, HO HO HO!")
+            .expect("Failed to write to test file");
+    }
+
+    #[tokio::test]
+    async fn returns_ok_and_some_if_found_in_db_and_file_exists() {
+        const EXPECTED_ID: &str = "TEST_ID";
+        const EXPECTED_SIZE: &str = "TEST_SIZE";
+        const EXPECTED_TYPE: &str = "png";
+        setup_test_file(
+            EXPECTED_ID.to_owned(),
+            EXPECTED_SIZE.to_owned(),
+            EXPECTED_TYPE.to_owned(),
+        );
+
+        let mut mock_repo = MockImageDbRepository::default();
+        mock_repo
+            .expect_get_by_id()
+            .with(predicate::function(|id: &String| id == EXPECTED_ID))
+            .returning(|_| {
+                Ok(ImageDbModel {
+                    id: EXPECTED_ID.to_owned(),
+                    image_data: "".to_owned(),
+                    description: "".to_owned(),
+                    hidden: false,
+                    file_type: EXPECTED_TYPE.to_owned(),
+                })
+            });
+
+        let result = get_image_internal(
+            &(Box::new(mock_repo) as _),
+            &EXPECTED_ID.to_owned(),
+            &EXPECTED_SIZE.to_owned(),
+        )
+        .await;
+
+        assert_eq!(result.0, Status::Ok);
+        assert!(result.1.is_some());
+    }
+}
