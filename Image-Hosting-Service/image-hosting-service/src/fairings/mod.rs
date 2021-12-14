@@ -22,7 +22,7 @@ impl Fairing for CorsMiddleware {
 
     /// Sets CORS headers based on incoming CORS request headers and configuration
     ///
-    /// #Headers
+    /// # Headers
     ///
     /// ## Access-Control-Allow-Origin
     /// If config `allow_all` is true, sets to `*`
@@ -30,7 +30,7 @@ impl Fairing for CorsMiddleware {
     /// is in `allowed_origins`. If so, sets ACAO = Origin, otherwise
     /// Does not set ACAO.
     ///  
-    /// #Failures
+    /// # Failures
     /// Fails if AppConfiguration cannot be found in the managed state
     async fn on_response<'r>(&self, req: &'r Request<'_>, res: &mut Response) -> () {
         let cors_config = req
