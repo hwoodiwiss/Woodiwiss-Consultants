@@ -224,6 +224,7 @@ mod get_image_test {
     use mockall::predicate::*;
     use mockall::*;
     use rocket::http::Status;
+    use serial_test::serial;
 
     use crate::{
         data::view_model::ImageDbModel,
@@ -279,6 +280,7 @@ mod get_image_test {
     }
 
     #[tokio::test]
+    #[serial]
     async fn returns_ok_and_some_if_found_in_db_and_file_exists() {
         run_test_async(|| {
             Box::pin(async {
@@ -311,6 +313,7 @@ mod get_image_test {
     }
 
     #[tokio::test]
+    #[serial]
     async fn returns_not_found_and_none_if_db_query_fails() {
         run_test_async(|| {
             Box::pin(async {
@@ -337,6 +340,7 @@ mod get_image_test {
     }
 
     #[tokio::test]
+    #[serial]
     async fn returns_not_found_and_none_if_file_type_does_not_match() {
         run_test_async(|| {
             Box::pin(async {
@@ -370,6 +374,7 @@ mod get_image_test {
     }
 
     #[tokio::test]
+    #[serial]
     async fn returns_not_found_and_none_if_size_does_not_exist() {
         run_test_async(|| {
             Box::pin(async {
@@ -404,6 +409,7 @@ mod get_image_test {
     }
 
     #[tokio::test]
+    #[serial]
     async fn returns_not_found_and_none_if_item_exists_in_db_but_not_in_storage() {
         run_test_async(|| {
             Box::pin(async {
@@ -436,4 +442,30 @@ mod get_image_test {
         })
         .await;
     }
+}
+
+#[cfg(test)]
+mod post_image_test {
+    use std::{future::Future, pin::Pin};
+
+    fn setup() {}
+
+    fn teardown() {}
+
+    /// Surrounds a test run with a setup and teardown function
+    ///
+    /// Test code should be asynchronous
+    async fn run_test_async<T>(test: T) -> ()
+    where
+        T: FnOnce() -> Pin<Box<dyn Future<Output = ()>>>,
+    {
+        setup();
+
+        test().await;
+
+        teardown();
+    }
+
+    #[tokio::test]
+    async fn test() {}
 }
