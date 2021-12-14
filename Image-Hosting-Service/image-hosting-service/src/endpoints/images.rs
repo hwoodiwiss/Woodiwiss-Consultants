@@ -1,10 +1,9 @@
 use crate::{
-    data::view_model::{ImageDbModel, ImageViewModel},
-    database::Images::dsl,
+    data::view_model::ImageViewModel,
     responders::OptionsResponse,
+    service::{image_db_service::ImageRepository, ImageDbRepository},
     ImageDb,
 };
-use diesel::prelude::*;
 
 use rocket::{http::Status, response::status, serde::json};
 
@@ -23,21 +22,14 @@ async fn options() -> OptionsResponse {
 
 #[get("/images")]
 async fn get_images(db_pool: ImageDb) -> status::Custom<Option<json::Json<Vec<ImageViewModel>>>> {
-    get_images_internal(db_pool).await
+    get_images_internal(&(Box::new(ImageRepository::new(db_pool)) as _)).await
 }
 
 #[inline]
 async fn get_images_internal(
-    db_pool: ImageDb,
+    image_repository: &Box<dyn ImageDbRepository>,
 ) -> status::Custom<Option<json::Json<Vec<ImageViewModel>>>> {
-    match db_pool
-        .run(|conn| {
-            dsl::Images
-                .filter(&dsl::Hidden.eq(false))
-                .load::<ImageDbModel>(conn)
-        })
-        .await
-    {
+    match image_repository.get_all().await {
         Ok(db_items) => status::Custom(
             Status::Ok,
             Some(json::Json(

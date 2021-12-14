@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use acs_image_analysis::ImageAnalysisError;
 
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use rocket::{
     fs::NamedFile,
     http::Status,
@@ -20,12 +19,11 @@ use crate::{
         image::{ImageResponse, ImageSizeInfo},
         view_model::ImageDbModel,
     },
-    database::{self, Images::dsl},
     guards::RequestImage,
     responders::OptionsResponse,
     service::{
-        image_analysis::ImageAnalysisServiceError, ImageAnalysisService, ResizeService,
-        StorageProvider,
+        image_analysis::ImageAnalysisServiceError, image_db_service::ImageRepository,
+        ImageAnalysisService, ImageDbRepository, ResizeService, StorageProvider,
     },
     ImageDb,
 };
@@ -88,7 +86,7 @@ async fn post_image(
     hidden: Option<bool>,
 ) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
     post_image_internal(
-        db_conn,
+        &(Box::new(ImageRepository::new(db_conn)) as _),
         analysis_service.inner(),
         resize_service.inner(),
         storage_provider.inner(),
@@ -100,7 +98,7 @@ async fn post_image(
 
 #[inline]
 async fn post_image_internal(
-    db_conn: ImageDb,
+    image_repository: &Box<dyn ImageDbRepository>,
     analysis_service: &Box<dyn ImageAnalysisService>,
     resize_service: &Box<dyn ResizeService>,
     storage_provider: &Box<dyn StorageProvider>,
@@ -154,18 +152,14 @@ async fn post_image_internal(
         Ok(res) => res,
         Err(_) => return status::Custom(Status::InternalServerError, Either::Right("")),
     };
-    let image_row = (
-        dsl::Id.eq(id),
-        dsl::ImageData.eq(image_size_json),
-        dsl::Description.eq(description.clone()),
-        dsl::Hidden.eq(hidden),
-        dsl::FileType.eq(request_image.image_format.extensions_str()[0]),
-    );
-    match db_conn
-        .run(move |conn| {
-            diesel::insert_into(database::Images::dsl::Images)
-                .values(&image_row)
-                .execute(conn)
+
+    match image_repository
+        .add(ImageDbModel {
+            id: id,
+            image_data: image_size_json,
+            description: description.clone(),
+            hidden,
+            file_type: request_image.image_format.extensions_str()[0].to_string(),
         })
         .await
     {
@@ -180,25 +174,17 @@ async fn get_image(
     id: String,
     size: String,
 ) -> response::status::Custom<Option<NamedFile>> {
-    get_image_internal(db_conn, &id, &size).await
+    get_image_internal(&(Box::new(ImageRepository::new(db_conn)) as _), &id, &size).await
 }
 
 #[inline]
 async fn get_image_internal(
-    db_conn: ImageDb,
+    image_repository: &Box<dyn ImageDbRepository>,
     id: &String,
     size: &String,
 ) -> response::status::Custom<Option<NamedFile>> {
-    let qry_id = id.clone();
     //Returns not found if not found in the database
-    let image_metadata = match db_conn
-        .run(|conn| {
-            dsl::Images
-                .filter(&dsl::Id.eq(qry_id))
-                .first::<ImageDbModel>(conn)
-        })
-        .await
-    {
+    let image_metadata = match image_repository.get_by_id(id.clone()).await {
         Ok(item) => item,
         Err(_) => return response::status::Custom(Status::NotFound, None),
     };
