@@ -100,6 +100,17 @@ async fn post_image(
 
 /// Analyses, resizes and stores an image provided by a user
 ///
+/// # Ok
+/// Returns Ok if all processing is successful, and image data is
+/// stored in the database
+///
+/// # Bad Request
+/// Returns Bad Request if image analysis fails for an image-related
+/// reason or if the image yields no descriptions
+///
+/// # Internal Server Error
+/// Returns an ise if a configuration, connection or environment
+/// error occurs
 #[inline]
 async fn post_image_internal(
     image_repository: &Box<dyn ImageDbRepository>,

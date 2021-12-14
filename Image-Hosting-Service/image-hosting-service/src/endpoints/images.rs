@@ -28,10 +28,12 @@ async fn get_images(db_pool: ImageDb) -> status::Custom<Option<json::Json<Vec<Im
 
 /// Returns a list of all non-hidden images in json format
 ///
-/// #Errors
+/// # Ok
+/// Returns the metadata for all non-hidden items in the database
 ///
-/// Returns InternalServerError on Invalid json in the database
-/// and database read failures
+/// # Internal Server Error
+/// Returns ise if the database query fails, or the data in
+/// the database cannot be parsed
 #[inline]
 async fn get_images_internal(
     image_repository: &Box<dyn ImageDbRepository>,
