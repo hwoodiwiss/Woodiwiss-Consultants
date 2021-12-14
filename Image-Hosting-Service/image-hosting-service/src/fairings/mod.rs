@@ -20,9 +20,9 @@ impl Fairing for CorsMiddleware {
 
     /// Sets CORS headers based on incoming CORS request headers and configuration
     ///
-    /// # Headers
+    /// ## Headers
     ///
-    /// ## Access-Control-Allow-Origin
+    /// ### Access-Control-Allow-Origin
     /// If config `allow_all` is true, sets to `*`
     /// Otherwise checks whether value of incoming `Origin` header
     /// is in `allowed_origins`. If so, sets ACAO = Origin, otherwise

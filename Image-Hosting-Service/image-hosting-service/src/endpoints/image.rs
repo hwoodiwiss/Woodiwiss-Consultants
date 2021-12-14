@@ -100,15 +100,17 @@ async fn post_image(
 
 /// Analyses, resizes and stores an image provided by a user
 ///
-/// # Ok
+/// # Responses
+///
+/// ## Ok
 /// Returns Ok if all processing is successful, and image data is
 /// stored in the database
 ///
-/// # Bad Request
+/// ## Bad Request
 /// Returns Bad Request if image analysis fails for an image-related
 /// reason or if the image yields no descriptions
 ///
-/// # Internal Server Error
+/// ## Internal Server Error
 /// Returns an ise if a configuration, connection or environment
 /// error occurs
 #[inline]
@@ -195,10 +197,12 @@ async fn get_image(
 
 /// Gets the image requested by a user or returns not found
 ///
-/// # Ok
+/// # Responses
+///
+/// ## Ok
 /// Returns Ok if the file can be opened and sent
 ///
-/// # Not Found
+/// ## Not Found
 /// Returns not found if DB query fails for any reason
 /// Or if reading the file fails for any reason
 #[inline]
