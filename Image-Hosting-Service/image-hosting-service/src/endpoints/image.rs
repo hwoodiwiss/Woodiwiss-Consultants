@@ -110,14 +110,14 @@ async fn post_image_internal(
     hidden: Option<bool>,
 ) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
     let hidden = hidden.unwrap_or(false);
-    let image_analysis = analysis_service
+    let description = match analysis_service
         .get_description(&request_image.bytes[..])
-        .await;
-
-    let description = match image_analysis {
+        .await
+    {
         Ok(description) => description,
         Err(err) => return map_analysis_service_error_to_status(&err),
     };
+
     let id = Uuid::new_v4().to_hyphenated_ref().to_string();
     let mut image_sizes = HashMap::<String, ImageSizeInfo>::new();
     let resized_images = resize_service.resize(&request_image.as_image).await;
