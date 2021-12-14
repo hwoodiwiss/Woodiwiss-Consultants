@@ -16,6 +16,7 @@ fn map_diesel_error_to_db_error(err: diesel::result::Error) -> DbServiceError {
         diesel::result::Error::DatabaseError(_, _) => DbServiceError::DbError,
         diesel::result::Error::DeserializationError(_) => DbServiceError::DeserializationError,
         diesel::result::Error::SerializationError(_) => DbServiceError::SerializationError,
+        diesel::result::Error::NotFound => DbServiceError::NotFound,
         _ => DbServiceError::UnknownError,
     }
 }

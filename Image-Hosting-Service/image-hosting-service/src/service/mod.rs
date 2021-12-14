@@ -10,5 +10,6 @@ pub enum DbServiceError {
     DbError,
     SerializationError,
     DeserializationError,
+    NotFound,
     UnknownError,
 }
