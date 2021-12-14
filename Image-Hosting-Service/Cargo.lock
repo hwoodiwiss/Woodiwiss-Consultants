@@ -698,6 +698,7 @@ dependencies = [
  "diesel",
  "figment",
  "image",
+ "mockall",
  "rocket",
  "rocket_sync_db_pools",
  "serde",
