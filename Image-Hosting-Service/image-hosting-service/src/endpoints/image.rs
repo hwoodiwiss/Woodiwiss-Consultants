@@ -200,17 +200,52 @@ async fn get_image_internal(
 #[cfg(test)]
 mod test {
     use std::{
-        fs::{create_dir_all, File},
+        fs::{create_dir_all, remove_dir_all, File},
+        future::Future,
         io::Write,
+        pin::Pin,
     };
 
     use mockall::predicate::*;
     use mockall::*;
     use rocket::http::Status;
 
-    use crate::{data::view_model::ImageDbModel, service::MockImageDbRepository};
+    use crate::{
+        data::view_model::ImageDbModel,
+        service::{DbServiceError, MockImageDbRepository},
+    };
+
+    const EXPECTED_ID: &str = "TEST_ID";
+    const EXPECTED_SIZE: &str = "TEST_SIZE";
+    const EXPECTED_TYPE: &str = "png";
 
     use super::get_image_internal;
+
+    fn setup() {
+        setup_test_file(
+            EXPECTED_ID.to_owned(),
+            EXPECTED_SIZE.to_owned(),
+            EXPECTED_TYPE.to_owned(),
+        );
+    }
+
+    fn teardown() {
+        clear_test_files();
+    }
+
+    /// Surrounds a test run with a setup and teardown function
+    ///
+    /// Test code should be asynchronous
+    async fn run_test_async<T>(test: T) -> ()
+    where
+        T: FnOnce() -> Pin<Box<dyn Future<Output = ()>>>,
+    {
+        setup();
+
+        test().await;
+
+        teardown();
+    }
 
     fn setup_test_file(id: String, size: String, file_type: String) {
         create_dir_all(format!("./images/{}/", id).as_str()).expect(
@@ -222,39 +257,168 @@ mod test {
             .expect("Failed to write to test file");
     }
 
+    fn clear_test_files() {
+        remove_dir_all(format!("./images/").as_str()).expect(
+            "Failed to clear image path. Check you have permissions to read and write there.",
+        );
+    }
+
     #[tokio::test]
     async fn returns_ok_and_some_if_found_in_db_and_file_exists() {
-        const EXPECTED_ID: &str = "TEST_ID";
-        const EXPECTED_SIZE: &str = "TEST_SIZE";
-        const EXPECTED_TYPE: &str = "png";
-        setup_test_file(
-            EXPECTED_ID.to_owned(),
-            EXPECTED_SIZE.to_owned(),
-            EXPECTED_TYPE.to_owned(),
-        );
+        run_test_async(|| {
+            Box::pin(async {
+                let mut mock_repo = MockImageDbRepository::default();
+                mock_repo
+                    .expect_get_by_id()
+                    .with(predicate::function(|id: &String| id == EXPECTED_ID))
+                    .returning(|_| {
+                        Ok(ImageDbModel {
+                            id: EXPECTED_ID.to_owned(),
+                            image_data: "".to_owned(),
+                            description: "".to_owned(),
+                            hidden: false,
+                            file_type: EXPECTED_TYPE.to_owned(),
+                        })
+                    });
 
-        let mut mock_repo = MockImageDbRepository::default();
-        mock_repo
-            .expect_get_by_id()
-            .with(predicate::function(|id: &String| id == EXPECTED_ID))
-            .returning(|_| {
-                Ok(ImageDbModel {
-                    id: EXPECTED_ID.to_owned(),
-                    image_data: "".to_owned(),
-                    description: "".to_owned(),
-                    hidden: false,
-                    file_type: EXPECTED_TYPE.to_owned(),
-                })
-            });
+                let result = get_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &EXPECTED_ID.to_owned(),
+                    &EXPECTED_SIZE.to_owned(),
+                )
+                .await;
 
-        let result = get_image_internal(
-            &(Box::new(mock_repo) as _),
-            &EXPECTED_ID.to_owned(),
-            &EXPECTED_SIZE.to_owned(),
-        )
+                assert_eq!(result.0, Status::Ok);
+                assert!(result.1.is_some());
+            })
+        })
         .await;
+    }
 
-        assert_eq!(result.0, Status::Ok);
-        assert!(result.1.is_some());
+    #[tokio::test]
+    async fn returns_not_found_and_none_if_db_query_fails() {
+        run_test_async(|| {
+            Box::pin(async {
+                const EXPECTED_ID: &str = "TEST_ID_2";
+
+                let mut mock_repo = MockImageDbRepository::default();
+                mock_repo
+                    .expect_get_by_id()
+                    .with(predicate::function(|id: &String| id == EXPECTED_ID))
+                    .returning(|_| Err(DbServiceError::UnknownError));
+
+                let result = get_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &EXPECTED_ID.to_owned(),
+                    &"".to_owned(),
+                )
+                .await;
+
+                assert_eq!(result.0, Status::NotFound);
+                assert!(result.1.is_none());
+            })
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn returns_not_found_and_none_if_file_type_does_not_match() {
+        run_test_async(|| {
+            Box::pin(async {
+                const DB_TYPE: &str = "jpg";
+                let mut mock_repo = MockImageDbRepository::default();
+                mock_repo
+                    .expect_get_by_id()
+                    .with(predicate::function(|id: &String| id == EXPECTED_ID))
+                    .returning(|_| {
+                        Ok(ImageDbModel {
+                            id: EXPECTED_ID.to_owned(),
+                            image_data: "".to_owned(),
+                            description: "".to_owned(),
+                            hidden: false,
+                            file_type: DB_TYPE.to_owned(),
+                        })
+                    });
+
+                let result = get_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &EXPECTED_ID.to_owned(),
+                    &EXPECTED_SIZE.to_owned(),
+                )
+                .await;
+
+                assert_eq!(result.0, Status::NotFound);
+                assert!(result.1.is_none());
+            })
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn returns_not_found_and_none_if_size_does_not_exist() {
+        run_test_async(|| {
+            Box::pin(async {
+                const REQUESTED_SIZE: &str = "TEST_OPTIMAL";
+
+                let mut mock_repo = MockImageDbRepository::default();
+                mock_repo
+                    .expect_get_by_id()
+                    .with(predicate::function(|id: &String| id == EXPECTED_ID))
+                    .returning(|_| {
+                        Ok(ImageDbModel {
+                            id: EXPECTED_ID.to_owned(),
+                            image_data: "".to_owned(),
+                            description: "".to_owned(),
+                            hidden: false,
+                            file_type: EXPECTED_TYPE.to_owned(),
+                        })
+                    });
+
+                let result = get_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &EXPECTED_ID.to_owned(),
+                    &REQUESTED_SIZE.to_owned(),
+                )
+                .await;
+
+                assert_eq!(result.0, Status::NotFound);
+                assert!(result.1.is_none());
+            })
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn returns_not_found_and_none_if_item_exists_in_db_but_not_in_storage() {
+        run_test_async(|| {
+            Box::pin(async {
+                const REQUESTED_ID: &str = "NOT_EXPECTED_ID";
+
+                let mut mock_repo = MockImageDbRepository::default();
+                mock_repo
+                    .expect_get_by_id()
+                    .with(predicate::function(|id: &String| id == REQUESTED_ID))
+                    .returning(|_| {
+                        Ok(ImageDbModel {
+                            id: REQUESTED_ID.to_owned(),
+                            image_data: "".to_owned(),
+                            description: "".to_owned(),
+                            hidden: false,
+                            file_type: EXPECTED_TYPE.to_owned(),
+                        })
+                    });
+
+                let result = get_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &REQUESTED_ID.to_owned(),
+                    &EXPECTED_SIZE.to_owned(),
+                )
+                .await;
+
+                assert_eq!(result.0, Status::NotFound);
+                assert!(result.1.is_none());
+            })
+        })
+        .await;
     }
 }
