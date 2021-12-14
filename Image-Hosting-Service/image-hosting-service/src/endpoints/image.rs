@@ -108,7 +108,6 @@ async fn post_image_internal(
     request_image: RequestImage,
     hidden: Option<bool>,
 ) -> status::Custom<Either<json::Json<ImageResponse>, &'static str>> {
-    println!("In controller");
     let hidden = hidden.unwrap_or(false);
     let image_analysis = analysis_service
         .get_description(&request_image.bytes[..])
