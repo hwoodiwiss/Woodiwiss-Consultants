@@ -448,15 +448,18 @@ mod get_image_test {
 mod post_image_test {
     use std::{collections::HashMap, future::Future, pin::Pin};
 
+    use acs_image_analysis::ImageAnalysisError;
     use image::DynamicImage;
     use mockall::predicate;
-    use rocket::http::Status;
+    use rocket::{http::Status, serde::json::serde_json};
 
     use crate::{
-        data::image::ImageSizeInfo,
+        data::{image::ImageSizeInfo, view_model::ImageDbModel},
         guards::RequestImage,
         service::{
-            MockImageAnalysisService, MockImageDbRepository, MockResizeService, MockStorageProvider,
+            image_analysis::ImageAnalysisServiceError, storage_provider::StorageProviderError,
+            DbServiceError, MockImageAnalysisService, MockImageDbRepository, MockResizeService,
+            MockStorageProvider,
         },
     };
 
@@ -561,8 +564,20 @@ mod post_image_test {
                         .returning(move |_, _, _, _| Ok(metadata.clone()));
                 }
 
+                let image_data = image_sizes.clone();
+
                 let mut mock_repo = MockImageDbRepository::default();
-                mock_repo.expect_add().returning(|_| Ok(()));
+                mock_repo
+                    .expect_add()
+                    .with(predicate::function(move |model: &ImageDbModel| {
+                        model.description == EXPECTED_DESCRIPTION
+                            && serde_json::from_str::<HashMap<String, ImageSizeInfo>>(
+                                &model.image_data.as_str(),
+                            )
+                            .expect("Failed to deserialize image data")
+                                == image_data
+                    }))
+                    .returning(|_| Ok(()));
 
                 let result = post_image_internal(
                     &(Box::new(mock_repo) as _),
@@ -583,6 +598,372 @@ mod post_image_test {
                     .0;
                 assert_eq!(result_val.description, EXPECTED_DESCRIPTION);
                 assert_eq!(result_val.image_sizes, image_sizes);
+            })
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn returns_ok_with_image_metadata_when_all_services_succeed_and_hidden_true() {
+        run_test_async(|| {
+            Box::pin(async {
+                let request_image = mock_request_image();
+                let image_data = mock_image_sizes(&["smol", "big"]);
+                let sized_images = HashMap::<String, DynamicImage>::from_iter(
+                    image_data.iter().map(|a| (a.0.clone(), a.1 .0.clone())),
+                );
+                let image_sizes = HashMap::<String, ImageSizeInfo>::from_iter(
+                    image_data.iter().map(|a| (a.0.clone(), a.1 .1.clone())),
+                );
+                let mut mock_image_service = MockImageAnalysisService::default();
+                mock_image_service
+                    .expect_get_description()
+                    .returning(|_| Ok(EXPECTED_DESCRIPTION.to_owned()));
+
+                let mut mock_resize_service = MockResizeService::default();
+                mock_resize_service
+                    .expect_resize()
+                    .returning(move |_| sized_images.clone());
+
+                let mut mock_storage_provider = MockStorageProvider::default();
+
+                for (size, (image, metadata)) in image_data {
+                    mock_storage_provider
+                        .expect_save_image()
+                        .with(
+                            predicate::always(),
+                            predicate::eq(size.clone()),
+                            predicate::eq(image),
+                            predicate::always(),
+                        )
+                        .returning(move |_, _, _, _| Ok(metadata.clone()));
+                }
+
+                let image_data = image_sizes.clone();
+
+                let mut mock_repo = MockImageDbRepository::default();
+                mock_repo
+                    .expect_add()
+                    .with(predicate::function(move |model: &ImageDbModel| {
+                        model.description == EXPECTED_DESCRIPTION
+                            && serde_json::from_str::<HashMap<String, ImageSizeInfo>>(
+                                &model.image_data.as_str(),
+                            )
+                            .expect("Failed to deserialize image data")
+                                == image_data
+                            && model.hidden == true
+                    }))
+                    .returning(|_| Ok(()));
+
+                let result = post_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &(Box::new(mock_image_service) as _),
+                    &(Box::new(mock_resize_service) as _),
+                    &(Box::new(mock_storage_provider) as _),
+                    request_image,
+                    Some(true),
+                )
+                .await;
+
+                assert_eq!(result.0, Status::Ok);
+                assert!(result.1.is_left());
+                let result_val = result
+                    .1
+                    .left()
+                    .expect("Could not get image response from Ok result")
+                    .0;
+                assert_eq!(result_val.description, EXPECTED_DESCRIPTION);
+                assert_eq!(result_val.image_sizes, image_sizes);
+            })
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn returns_bad_request_if_analysis_service_cannot_describe_image() {
+        run_test_async(|| {
+            Box::pin(async {
+                let request_image = mock_request_image();
+                let mut mock_image_service = MockImageAnalysisService::default();
+                mock_image_service
+                    .expect_get_description()
+                    .returning(|_| Err(ImageAnalysisServiceError::FailedToDescribeImage));
+
+                let mock_resize_service = MockResizeService::default();
+                let mock_storage_provider = MockStorageProvider::default();
+                let mock_repo = MockImageDbRepository::default();
+
+                let result = post_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &(Box::new(mock_image_service) as _),
+                    &(Box::new(mock_resize_service) as _),
+                    &(Box::new(mock_storage_provider) as _),
+                    request_image,
+                    None,
+                )
+                .await;
+
+                assert_eq!(result.0, Status::BadRequest);
+                assert!(result.1.is_right());
+                let result_val = result
+                    .1
+                    .right()
+                    .expect("Could not get image response from Ok result");
+                assert_eq!(
+                    result_val,
+                    "The provider could not describe the provided image"
+                );
+            })
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn returns_bad_request_if_image_is_incorrect_format() {
+        run_test_async(|| {
+            Box::pin(async {
+                let request_image = mock_request_image();
+                let mut mock_image_service = MockImageAnalysisService::default();
+                mock_image_service.expect_get_description().returning(|_| {
+                    Err(ImageAnalysisServiceError::ImageAnalysisError(
+                        ImageAnalysisError::InvalidImageFormat,
+                    ))
+                });
+
+                let mock_resize_service = MockResizeService::default();
+                let mock_storage_provider = MockStorageProvider::default();
+                let mock_repo = MockImageDbRepository::default();
+
+                let result = post_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &(Box::new(mock_image_service) as _),
+                    &(Box::new(mock_resize_service) as _),
+                    &(Box::new(mock_storage_provider) as _),
+                    request_image,
+                    None,
+                )
+                .await;
+
+                assert_eq!(result.0, Status::BadRequest);
+                assert!(result.1.is_right());
+                let result_val = result
+                    .1
+                    .right()
+                    .expect("Could not get image response from Ok result");
+                assert_eq!(result_val, "Invalid image format");
+            })
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn returns_internal_server_error_if_image_analysis_response_code_is_unexpected() {
+        run_test_async(|| {
+            Box::pin(async {
+                let request_image = mock_request_image();
+                let mut mock_image_service = MockImageAnalysisService::default();
+                mock_image_service.expect_get_description().returning(|_| {
+                    Err(ImageAnalysisServiceError::ImageAnalysisError(
+                        ImageAnalysisError::UnexpectedResponseCode(567u16),
+                    ))
+                });
+
+                let mock_resize_service = MockResizeService::default();
+                let mock_storage_provider = MockStorageProvider::default();
+                let mock_repo = MockImageDbRepository::default();
+
+                let result = post_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &(Box::new(mock_image_service) as _),
+                    &(Box::new(mock_resize_service) as _),
+                    &(Box::new(mock_storage_provider) as _),
+                    request_image,
+                    None,
+                )
+                .await;
+
+                assert_eq!(result.0, Status::InternalServerError);
+                assert!(result.1.is_right());
+                let result_val = result
+                    .1
+                    .right()
+                    .expect("Could not get image response from Ok result");
+                assert_eq!(result_val, "");
+            })
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn returns_internal_server_error_if_image_analysis_response_format_is_unexpected() {
+        run_test_async(|| {
+            Box::pin(async {
+                let request_image = mock_request_image();
+                let mut mock_image_service = MockImageAnalysisService::default();
+                mock_image_service.expect_get_description().returning(|_| {
+                    Err(ImageAnalysisServiceError::ImageAnalysisError(
+                        ImageAnalysisError::UnexpectedResponseFormat(String::from("\u{1f600}")),
+                    ))
+                });
+
+                let mock_resize_service = MockResizeService::default();
+                let mock_storage_provider = MockStorageProvider::default();
+                let mock_repo = MockImageDbRepository::default();
+
+                let result = post_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &(Box::new(mock_image_service) as _),
+                    &(Box::new(mock_resize_service) as _),
+                    &(Box::new(mock_storage_provider) as _),
+                    request_image,
+                    None,
+                )
+                .await;
+
+                assert_eq!(result.0, Status::InternalServerError);
+                assert!(result.1.is_right());
+                let result_val = result
+                    .1
+                    .right()
+                    .expect("Could not get image response from Ok result");
+                assert_eq!(result_val, "");
+            })
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn returns_internal_server_error_if_saving_any_image_fails() {
+        run_test_async(|| {
+            Box::pin(async {
+                let request_image = mock_request_image();
+                let image_data = mock_image_sizes(&["optimal", "thumbnail"]);
+                let sized_images = HashMap::<String, DynamicImage>::from_iter(
+                    image_data.iter().map(|a| (a.0.clone(), a.1 .0.clone())),
+                );
+
+                let mut mock_image_service = MockImageAnalysisService::default();
+                mock_image_service.expect_get_description().returning(|_| {
+                    Err(ImageAnalysisServiceError::ImageAnalysisError(
+                        ImageAnalysisError::UnexpectedResponseFormat(String::from("\u{1f600}")),
+                    ))
+                });
+
+                let mut mock_resize_service = MockResizeService::default();
+                mock_resize_service
+                    .expect_resize()
+                    .returning(move |_| sized_images.clone());
+
+                let mut mock_storage_provider = MockStorageProvider::default();
+
+                for (size, (image, _metadata)) in image_data {
+                    mock_storage_provider
+                        .expect_save_image()
+                        .with(
+                            predicate::always(),
+                            predicate::eq(size.clone()),
+                            predicate::eq(image),
+                            predicate::always(),
+                        )
+                        .returning(move |_, _, _, _| Err(StorageProviderError::ImageError));
+                }
+
+                let mut mock_repo = MockImageDbRepository::default();
+                mock_repo
+                    .expect_add()
+                    .with(predicate::never())
+                    .returning(|_| Ok(()));
+
+                let result = post_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &(Box::new(mock_image_service) as _),
+                    &(Box::new(mock_resize_service) as _),
+                    &(Box::new(mock_storage_provider) as _),
+                    request_image,
+                    None,
+                )
+                .await;
+
+                assert_eq!(result.0, Status::InternalServerError);
+                assert!(result.1.is_right());
+                let result_val = result
+                    .1
+                    .right()
+                    .expect("Could not get image response from Ok result");
+                assert_eq!(result_val, "");
+            })
+        })
+        .await;
+    }
+
+    #[tokio::test]
+    async fn returns_internal_server_error_when_storing_image_metadata_fails() {
+        run_test_async(|| {
+            Box::pin(async {
+                let request_image = mock_request_image();
+                let image_data = mock_image_sizes(&["smol", "big"]);
+                let sized_images = HashMap::<String, DynamicImage>::from_iter(
+                    image_data.iter().map(|a| (a.0.clone(), a.1 .0.clone())),
+                );
+                let image_sizes = HashMap::<String, ImageSizeInfo>::from_iter(
+                    image_data.iter().map(|a| (a.0.clone(), a.1 .1.clone())),
+                );
+                let mut mock_image_service = MockImageAnalysisService::default();
+                mock_image_service
+                    .expect_get_description()
+                    .returning(|_| Ok(EXPECTED_DESCRIPTION.to_owned()));
+
+                let mut mock_resize_service = MockResizeService::default();
+                mock_resize_service
+                    .expect_resize()
+                    .returning(move |_| sized_images.clone());
+
+                let mut mock_storage_provider = MockStorageProvider::default();
+
+                for (size, (image, metadata)) in image_data {
+                    mock_storage_provider
+                        .expect_save_image()
+                        .with(
+                            predicate::always(),
+                            predicate::eq(size.clone()),
+                            predicate::eq(image),
+                            predicate::always(),
+                        )
+                        .returning(move |_, _, _, _| Ok(metadata.clone()));
+                }
+
+                let image_data = image_sizes.clone();
+
+                let mut mock_repo = MockImageDbRepository::default();
+                mock_repo
+                    .expect_add()
+                    .with(predicate::function(move |model: &ImageDbModel| {
+                        model.description == EXPECTED_DESCRIPTION
+                            && serde_json::from_str::<HashMap<String, ImageSizeInfo>>(
+                                &model.image_data.as_str(),
+                            )
+                            .expect("Failed to deserialize image data")
+                                == image_data
+                    }))
+                    .returning(|_| Err(DbServiceError::DbError));
+
+                let result = post_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &(Box::new(mock_image_service) as _),
+                    &(Box::new(mock_resize_service) as _),
+                    &(Box::new(mock_storage_provider) as _),
+                    request_image,
+                    None,
+                )
+                .await;
+
+                assert_eq!(result.0, Status::InternalServerError);
+                assert!(result.1.is_right());
+                let result_val = result
+                    .1
+                    .right()
+                    .expect("Could not get image response from Ok result");
+                assert_eq!(result_val, "");
             })
         })
         .await;
