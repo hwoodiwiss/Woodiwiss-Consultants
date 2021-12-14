@@ -287,7 +287,7 @@ mod get_image_test {
                 let mut mock_repo = MockImageDbRepository::default();
                 mock_repo
                     .expect_get_by_id()
-                    .with(predicate::function(|id: &String| id == EXPECTED_ID))
+                    .with(predicate::eq(EXPECTED_ID.to_owned()))
                     .returning(|_| {
                         Ok(ImageDbModel {
                             id: EXPECTED_ID.to_owned(),
@@ -322,7 +322,7 @@ mod get_image_test {
                 let mut mock_repo = MockImageDbRepository::default();
                 mock_repo
                     .expect_get_by_id()
-                    .with(predicate::function(|id: &String| id == EXPECTED_ID))
+                    .with(predicate::eq(EXPECTED_ID.to_owned()))
                     .returning(|_| Err(DbServiceError::UnknownError));
 
                 let result = get_image_internal(
@@ -348,7 +348,7 @@ mod get_image_test {
                 let mut mock_repo = MockImageDbRepository::default();
                 mock_repo
                     .expect_get_by_id()
-                    .with(predicate::function(|id: &String| id == EXPECTED_ID))
+                    .with(predicate::eq(EXPECTED_ID.to_owned()))
                     .returning(|_| {
                         Ok(ImageDbModel {
                             id: EXPECTED_ID.to_owned(),
@@ -383,7 +383,7 @@ mod get_image_test {
                 let mut mock_repo = MockImageDbRepository::default();
                 mock_repo
                     .expect_get_by_id()
-                    .with(predicate::function(|id: &String| id == EXPECTED_ID))
+                    .with(predicate::eq(EXPECTED_ID.to_owned()))
                     .returning(|_| {
                         Ok(ImageDbModel {
                             id: EXPECTED_ID.to_owned(),
@@ -418,7 +418,7 @@ mod get_image_test {
                 let mut mock_repo = MockImageDbRepository::default();
                 mock_repo
                     .expect_get_by_id()
-                    .with(predicate::function(|id: &String| id == REQUESTED_ID))
+                    .with(predicate::eq(REQUESTED_ID.to_owned()))
                     .returning(|_| {
                         Ok(ImageDbModel {
                             id: REQUESTED_ID.to_owned(),
@@ -446,7 +446,23 @@ mod get_image_test {
 
 #[cfg(test)]
 mod post_image_test {
-    use std::{future::Future, pin::Pin};
+    use std::{collections::HashMap, future::Future, pin::Pin};
+
+    use image::DynamicImage;
+    use mockall::predicate;
+    use rocket::http::Status;
+
+    use crate::{
+        data::image::ImageSizeInfo,
+        guards::RequestImage,
+        service::{
+            MockImageAnalysisService, MockImageDbRepository, MockResizeService, MockStorageProvider,
+        },
+    };
+
+    use super::post_image_internal;
+
+    const EXPECTED_DESCRIPTION: &str = "TEST_DESCRIPTION";
 
     fn setup() {}
 
@@ -466,6 +482,109 @@ mod post_image_test {
         teardown();
     }
 
+    fn mock_request_image() -> RequestImage {
+        let bytes = vec![0; 10000];
+        let as_image = image::DynamicImage::new_rgba8(100, 100);
+        let image_format = image::ImageFormat::Png;
+        RequestImage {
+            bytes,
+            as_image,
+            image_format,
+        }
+    }
+
+    fn mock_image_sizes(sizes: &[&str]) -> HashMap<String, (DynamicImage, ImageSizeInfo)> {
+        let mut images_map = HashMap::new();
+
+        for size in sizes.iter() {
+            images_map.insert(
+                String::from(*size),
+                (
+                    image::DynamicImage::new_rgba8(100, 100),
+                    ImageSizeInfo {
+                        uri: format!("id/{}.jpg", *size),
+                        width: 100,
+                        height: 100,
+                    },
+                ),
+            );
+        }
+
+        images_map.insert(
+            String::from("original"),
+            (
+                image::DynamicImage::new_rgba8(100, 100),
+                ImageSizeInfo {
+                    uri: String::from("id/original.jpg"),
+                    width: 100,
+                    height: 100,
+                },
+            ),
+        );
+
+        images_map
+    }
+
     #[tokio::test]
-    async fn test() {}
+    async fn returns_ok_with_image_metadata_when_all_services_succeed() {
+        run_test_async(|| {
+            Box::pin(async {
+                let request_image = mock_request_image();
+                let image_data = mock_image_sizes(&["smol", "big"]);
+                let sized_images = HashMap::<String, DynamicImage>::from_iter(
+                    image_data.iter().map(|a| (a.0.clone(), a.1 .0.clone())),
+                );
+                let image_sizes = HashMap::<String, ImageSizeInfo>::from_iter(
+                    image_data.iter().map(|a| (a.0.clone(), a.1 .1.clone())),
+                );
+                let mut mock_image_service = MockImageAnalysisService::default();
+                mock_image_service
+                    .expect_get_description()
+                    .returning(|_| Ok(EXPECTED_DESCRIPTION.to_owned()));
+
+                let mut mock_resize_service = MockResizeService::default();
+                mock_resize_service
+                    .expect_resize()
+                    .returning(move |_| sized_images.clone());
+
+                let mut mock_storage_provider = MockStorageProvider::default();
+
+                for (size, (image, metadata)) in image_data {
+                    mock_storage_provider
+                        .expect_save_image()
+                        .with(
+                            predicate::always(),
+                            predicate::eq(size.clone()),
+                            predicate::eq(image),
+                            predicate::always(),
+                        )
+                        .returning(move |_, _, _, _| Ok(metadata.clone()));
+                }
+
+                let mut mock_repo = MockImageDbRepository::default();
+                mock_repo.expect_add().returning(|_| Ok(()));
+
+                let result = post_image_internal(
+                    &(Box::new(mock_repo) as _),
+                    &(Box::new(mock_image_service) as _),
+                    &(Box::new(mock_resize_service) as _),
+                    &(Box::new(mock_storage_provider) as _),
+                    request_image,
+                    None,
+                )
+                .await;
+
+                assert_eq!(result.0, Status::Ok);
+                assert!(result.1.is_left());
+                let result_val = result
+                    .1
+                    .left()
+                    .expect("Could not get image response from Ok result")
+                    .0;
+                assert_eq!(result_val.description, EXPECTED_DESCRIPTION);
+                assert_eq!(result_val.image_sizes, image_sizes);
+            })
+        })
+        .await;
+    }
 }
