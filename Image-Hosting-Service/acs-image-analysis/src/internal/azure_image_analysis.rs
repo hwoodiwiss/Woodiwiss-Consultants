@@ -8,11 +8,19 @@ use crate::infra::{
     HttpClient, StatusCode, BAD_REQUEST, INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE,
 };
 
-pub struct AzureImageAnalysisClientInternal {
+/// Internal implementation of an `AzureImageAnalysisClient`
+///
+/// Allows for `analyse` to be called with any implementer of
+/// `HttpClient` opaquely.
+pub(crate) struct AzureImageAnalysisClientInternal {
     base_uri: String,
     key: String,
 }
 
+/// Attempts to deserialize a string ref into a T
+///
+/// If it fails, wraps the text that failed deserialization in
+/// an `ImageAnalysisError::UnexpectedResponseFormat` enum value
 fn deserialize_response_body<'a, T: Deserialize<'a>>(
     str: &'a str,
 ) -> Result<T, ImageAnalysisError> {
@@ -20,6 +28,10 @@ fn deserialize_response_body<'a, T: Deserialize<'a>>(
         .map_err(|_err| ImageAnalysisError::UnexpectedResponseFormat(str.to_owned()))
 }
 
+/// Maps a non-success Http Status code to an error enum
+///
+/// Returns a result as deserialize_response_body can fail
+/// and we want to propagate any error it returns
 fn map_error_for_non_success(
     status_code: StatusCode,
     response_body: &String,
@@ -48,6 +60,17 @@ impl AzureImageAnalysisClientInternal {
         }
     }
 
+    /// Posts image data to an Azure Cognitive Services instance
+    /// for image analysis
+    ///
+    /// # Returns
+    ///
+    /// Deserialized image analysis data from Azure
+    ///
+    /// # Errors
+    ///
+    /// Returns an `ImageAnalysisError` when something goes wrong
+    /// This will wrap any dependent errors
     pub async fn analyse<TClient: HttpClient>(
         &self,
         http_client: &TClient,
