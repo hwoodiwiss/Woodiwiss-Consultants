@@ -18,7 +18,7 @@ jobs:
       - name: Install Junit Reporter
         run: cargo install cargo2junit
       - name: Run Unit Tests
-        run: cargo test -- -Z unstable-options --format json --report-time >> cargo_test.json
+        run: cargo test -- --test-threads=1 -Z unstable-options --format json --report-time >> cargo_test.json
       - name: Convert to Junit
         run: cat cargo_test.json | cargo2junit >> junit.xml
       - name: Publish Test Results
