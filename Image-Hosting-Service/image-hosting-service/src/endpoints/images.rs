@@ -20,11 +20,18 @@ async fn options() -> OptionsResponse {
     }
 }
 
+/// A thin wrapper around the actual functionality to improve IDE support.
 #[get("/images")]
 async fn get_images(db_pool: ImageDb) -> status::Custom<Option<json::Json<Vec<ImageViewModel>>>> {
     get_images_internal(&(Box::new(ImageRepository::new(db_pool)) as _)).await
 }
 
+/// Returns a list of all non-hidden images in json format
+///
+/// #Errors
+///
+/// Returns InternalServerError on Invalid json in the database
+/// and database read failures
 #[inline]
 async fn get_images_internal(
     image_repository: &Box<dyn ImageDbRepository>,
