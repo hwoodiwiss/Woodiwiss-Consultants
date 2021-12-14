@@ -1,22 +1,25 @@
-use acs_image_analysis::ImageAnalysisError;
-
 use crate::data::config::AppConfiguration;
+use crate::service::service_t::ImageAnalysisService;
+use acs_image_analysis::ImageAnalysisError;
 
 pub enum ImageAnalysisServiceError {
     FailedToDescribeImage,
     ImageAnalysisError(ImageAnalysisError),
 }
 
-pub struct ImageAnalysisService(acs_image_analysis::AzureImageAnalysisClient);
+pub struct AzureImageAnalysisService(acs_image_analysis::AzureImageAnalysisClient);
 
-impl ImageAnalysisService {
+impl AzureImageAnalysisService {
     pub fn new(base_uri: &str, key: &str) -> Self {
         Self(acs_image_analysis::AzureImageAnalysisClient::new(
             base_uri, key,
         ))
     }
+}
 
-    pub async fn get_description(
+#[async_trait]
+impl ImageAnalysisService for AzureImageAnalysisService {
+    async fn get_description(
         &self,
         image_bytes: &[u8],
     ) -> Result<String, ImageAnalysisServiceError> {
@@ -49,9 +52,9 @@ pub fn stage() -> rocket::fairing::AdHoc {
 
             config.azure_cognitive_services.clone()
         };
-        rocket.manage(ImageAnalysisService::new(
+        rocket.manage(Box::new(AzureImageAnalysisService::new(
             acs_config.base_uri.as_str(),
             acs_config.key.as_str(),
-        ))
+        )) as Box<dyn ImageAnalysisService>)
     })
 }
