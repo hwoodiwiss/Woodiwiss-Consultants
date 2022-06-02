@@ -15,6 +15,12 @@ pub struct AzureCognitiveServicesConfig {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AzureStorageBlobConfig {
+    pub connection_string: String,
+    pub container_name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ImageSizeConfig {
     pub max_width: u32,
     pub max_height: u32,
@@ -32,5 +38,6 @@ pub struct AppConfiguration {
     pub azure_cognitive_services: AzureCognitiveServicesConfig,
     pub cors: CorsConfiguration,
     pub app_limits: ApplicationLimits,
-    pub storage_base: String,
+    pub storage_base: Option<String>,
+    pub azure_storage: Option<AzureStorageBlobConfig>,
 }

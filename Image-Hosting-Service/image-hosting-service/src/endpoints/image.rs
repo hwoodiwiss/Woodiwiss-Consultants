@@ -131,7 +131,7 @@ async fn post_image_internal(
         Err(err) => return map_analysis_service_error_to_status(&err),
     };
 
-    let id = Uuid::new_v4().to_hyphenated_ref().to_string();
+    let id = Uuid::new_v4().as_hyphenated().to_string();
     let mut image_sizes = HashMap::<String, ImageSizeInfo>::new();
     let resized_images = resize_service.resize(&request_image.as_image).await;
     for (size, image) in &resized_images {
@@ -472,9 +472,8 @@ mod post_image_test {
         data::{image::ImageSizeInfo, view_model::ImageDbModel},
         guards::RequestImage,
         service::{
-            image_analysis::ImageAnalysisServiceError, storage_provider::StorageProviderError,
-            DbServiceError, MockImageAnalysisService, MockImageDbRepository, MockResizeService,
-            MockStorageProvider,
+            image_analysis::ImageAnalysisServiceError, DbServiceError, MockImageAnalysisService,
+            MockImageDbRepository, MockResizeService, MockStorageProvider, StorageProviderError,
         },
     };
 

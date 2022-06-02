@@ -10,6 +10,5 @@
   "app_limits": {
     "allowed_formats": ["png", "jpg", "bmp"],
     "max_file_size": 4000000
-  },
-  "storage_base": "./images"
+  }
 }

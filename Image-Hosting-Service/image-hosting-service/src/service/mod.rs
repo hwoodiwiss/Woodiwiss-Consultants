@@ -1,3 +1,5 @@
+#[cfg(feature = "remote-storage")]
+pub mod azure_storage_provider;
 pub mod image_analysis;
 pub mod image_db_service;
 pub mod resize;
@@ -12,4 +14,13 @@ pub enum DbServiceError {
     DeserializationError,
     NotFound,
     UnknownError,
+}
+
+pub enum StorageProviderError {
+    ImageError,
+    InsufficientPermissions,
+    FileNotFound,
+    TimedOut,
+    OutOfMemory,
+    Unknown,
 }

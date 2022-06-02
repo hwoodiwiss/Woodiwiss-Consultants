@@ -6,10 +6,7 @@ use mockall::automock;
 
 use crate::data::{image::ImageSizeInfo, view_model::ImageDbModel};
 
-use super::{
-    image_analysis::ImageAnalysisServiceError, storage_provider::StorageProviderError,
-    DbServiceError,
-};
+use super::{image_analysis::ImageAnalysisServiceError, DbServiceError, StorageProviderError};
 
 #[cfg_attr(test, automock)]
 #[async_trait]
