@@ -38,8 +38,9 @@ impl LocalStorageProvider {
     }
 }
 
+#[async_trait]
 impl StorageProvider for LocalStorageProvider {
-    fn save_image(
+    async fn save_image(
         &self,
         id: String,
         size: String,

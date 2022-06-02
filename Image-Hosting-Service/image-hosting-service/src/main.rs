@@ -24,7 +24,13 @@ use rocket::{
     figment::{providers::Json, Figment},
     Config,
 };
-use service::{azure_storage_provider, image_analysis, resize, storage_provider};
+use service::{image_analysis, resize};
+
+#[cfg(not(feature = "remote-storage"))]
+use service::storage_provider;
+
+#[cfg(feature = "remote-storage")]
+use service::azure_storage_provider;
 //
 #[database("image_database")]
 pub struct ImageDb(diesel::MysqlConnection);
@@ -36,7 +42,7 @@ fn rocket() -> _ {
         .merge(Json::file("config.json"))
         .merge(Json::file("config.secrets.json"));
 
-    let builder = rocket::custom(figment)
+    rocket::custom(figment)
         .attach(AdHoc::config::<AppConfiguration>())
         .attach(CorsMiddleware)
         .attach(ImageDb::fairing())
@@ -44,13 +50,6 @@ fn rocket() -> _ {
         .attach(image::stage())
         .attach(images::stage())
         .attach(image_analysis::stage())
-        .attach(resize::stage());
-
-    #[cfg(not(feature = "remote-storage"))]
-    builder.attach(storage_provider::stage());
-
-    #[cfg(feature = "remote-storage")]
-    builder.attach(azure_storage_provider::stage());
-
-    builder
+        .attach(resize::stage())
+        .attach(azure_storage_provider::stage())
 }

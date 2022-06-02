@@ -7,7 +7,7 @@ edition = "2021"
 remote-storage = [
 	"dep:azure_core",
 	"dep:azure_storage",
-	"dep:azure_storage_blobs"
+	"dep:azure_storage_datalake"
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -22,8 +22,7 @@ acs-image-analysis = { path = "../acs-image-analysis" }
 uuid = { version = "1.1.1", features = ["v4"] }
 azure_core = { version = "0.2.0", optional = true }
 azure_storage = { version = "0.2.0", optional = true }
-azure_storage_blobs = { version = "0.2.0", optional = true }
-
+azure_storage_datalake = { version = "0.2.0", optional = true }
 
 [dependencies.rocket_sync_db_pools]
 version = "0.1.0-rc.2"

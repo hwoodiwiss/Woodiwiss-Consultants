@@ -16,7 +16,8 @@ pub struct AzureCognitiveServicesConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AzureStorageBlobConfig {
-    pub connection_string: String,
+    pub account_key: String,
+    pub account_name: String,
     pub container_name: String,
 }
 

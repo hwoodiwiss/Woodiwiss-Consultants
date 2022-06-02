@@ -137,12 +137,10 @@ async fn post_image_internal(
     for (size, image) in &resized_images {
         image_sizes.insert(
             size.clone(),
-            match storage_provider.save_image(
-                id.clone(),
-                size.clone(),
-                image,
-                request_image.image_format,
-            ) {
+            match storage_provider
+                .save_image(id.clone(), size.clone(), image, request_image.image_format)
+                .await
+            {
                 Ok(res) => res,
                 Err(_) => return status::Custom(Status::InternalServerError, Either::Right("")),
             },
@@ -150,12 +148,15 @@ async fn post_image_internal(
     }
     image_sizes.insert(
         String::from("original"),
-        match storage_provider.save_image(
-            id.clone(),
-            String::from("original"),
-            &request_image.as_image,
-            request_image.image_format,
-        ) {
+        match storage_provider
+            .save_image(
+                id.clone(),
+                String::from("original"),
+                &request_image.as_image,
+                request_image.image_format,
+            )
+            .await
+        {
             Ok(res) => res,
             Err(_) => return status::Custom(Status::InternalServerError, Either::Right("")),
         },

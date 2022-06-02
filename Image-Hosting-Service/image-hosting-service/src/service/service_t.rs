@@ -24,8 +24,9 @@ pub trait ResizeService: Send + Sync {
 }
 
 #[cfg_attr(test, automock)]
+#[async_trait]
 pub trait StorageProvider: Send + Sync {
-    fn save_image(
+    async fn save_image(
         &self,
         id: String,
         size: String,
