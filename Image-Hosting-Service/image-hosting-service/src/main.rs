@@ -26,11 +26,8 @@ use rocket::{
 };
 use service::{image_analysis, resize};
 
-#[cfg(not(feature = "remote-storage"))]
-use service::storage_provider;
+use service::storage_service;
 
-#[cfg(feature = "remote-storage")]
-use service::azure_storage_provider;
 //
 #[database("image_database")]
 pub struct ImageDb(diesel::MysqlConnection);
@@ -51,5 +48,5 @@ fn rocket() -> _ {
         .attach(images::stage())
         .attach(image_analysis::stage())
         .attach(resize::stage())
-        .attach(azure_storage_provider::stage())
+        .attach(storage_service::stage())
 }

@@ -28,7 +28,7 @@ fn map_io_error_to_storage_error(err: &io::Error) -> StorageProviderError {
     }
 }
 
-pub struct LocalStorageProvider {
+struct LocalStorageProvider {
     storage_base: String,
 }
 

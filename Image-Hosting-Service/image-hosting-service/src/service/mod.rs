@@ -1,12 +1,13 @@
-#[cfg(feature = "remote-storage")]
-pub mod azure_storage_provider;
 pub mod image_analysis;
 pub mod image_db_service;
 pub mod resize;
 mod service_t;
-pub mod storage_provider;
 
 pub use service_t::*;
+
+#[cfg_attr(not(feature = "remote-storage"), path = "storage_provider.rs")]
+#[cfg_attr(feature = "remote-storage", path = "azure_storage_provider.rs")]
+pub mod storage_service;
 
 pub enum DbServiceError {
     DbError,

@@ -34,7 +34,7 @@ fn map_io_error_to_storage_error(err: &io::Error) -> StorageProviderError {
     }
 }
 
-pub struct AzureBlobStorageProvider {
+struct AzureBlobStorageProvider {
     account_name: String,
     account_key: String,
     container_name: String,
