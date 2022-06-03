@@ -1,13 +1,9 @@
 use azure_core::ClientOptions;
-use azure_storage::prelude::*;
-use azure_storage::{core::prelude::*, storage_shared_key_credential::StorageSharedKeyCredential};
+use azure_storage::storage_shared_key_credential::StorageSharedKeyCredential;
 use azure_storage_datalake::clients::DataLakeClient;
 use std::{
     error::Error,
-    fs,
     io::{self, Cursor},
-    path::Path,
-    sync::Arc,
 };
 
 use image::{GenericImageView, ImageError};
@@ -96,9 +92,17 @@ impl StorageProvider for AzureBlobStorageProvider {
         image
             .write_to(&mut buf, file_type)
             .map_err(|err| map_image_error_to_storage_error(&err))?;
+        let buf = buf.into_inner();
+        let buf_len = buf.len() as i64;
+        println!("Uploading image {}", image_path);
+        file_client
+            .append(0, buf)
+            .into_future()
+            .await
+            .expect(&format!("Failed to begin file upload: {}!", image_path));
 
         file_client
-            .append(0, buf.into_inner())
+            .flush(buf_len)
             .into_future()
             .await
             .expect(&format!("Failed to upload file data: {}!", image_path));
